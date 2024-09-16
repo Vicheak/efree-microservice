@@ -1,0 +1,36 @@
+server:
+  port: ${SERVER_PORT}
+
+application:
+  title: ${APP_TITLE}
+  version: ${APP_VERSION}
+
+spring:
+  application:
+    name: configserver
+
+  profiles:
+    active: dev
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${GIT_URI}
+          clone-on-start: true
+          default-label: main
+
+encrypt:
+  key: 7e246bed-b513-4942-88a0-e68e562bb2d2
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+  info:
+    env:
+      enabled: true
