@@ -31,7 +31,7 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Override
     protected String getDatabaseName() {
-        return Objects.nonNull(this.database) ? this.database : "category_service_db";
+        return Objects.nonNull(this.database) ? this.database : "efree_db";
     }
 
     @Override
