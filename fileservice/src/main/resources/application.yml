@@ -1,0 +1,55 @@
+server:
+  port: ${SERVER_PORT}
+
+application:
+  title: ${APP_TITLE}
+  version: ${APP_VERSION}
+
+info:
+  app:
+    name: ${APP_TITLE}
+    description: ${APP_TITLE} ${APP_VERSION}
+    version: ${APP_VERSION}
+
+spring:
+  application:
+    name: file-service
+
+  profiles:
+    active: dev
+
+  servlet:
+    multipart:
+      max-request-size: 15MB
+      max-file-size: 15MB
+
+  config:
+    import: configserver:http://localhost:8888/
+
+file:
+  server-path: ${FILE_SERVER_PATH}
+  client-path: /file/**
+  base-uri: ${FILE_BASE_URI}
+  download-uri: ${FILE_DOWNLOAD_URI}
+
+eureka:
+  instance:
+    preferIpAddress: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS}
+
+  client:
+    register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA}
+    fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+  info:
+    env:
+      enabled: true
