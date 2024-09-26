@@ -13,21 +13,23 @@ info:
 
 spring:
   application:
-    name: configserver
+    name: eurekaserver
 
   profiles:
     active: dev
 
-  cloud:
-    config:
-      server:
-        git:
-          uri: ${GIT_URI}
-          clone-on-start: true
-          default-label: main
+  config:
+    import: configserver:http://localhost:8888/
 
-encrypt:
-  key: 7e246bed-b513-4942-88a0-e68e562bb2d2
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME}
+
+  client:
+    register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA}
+    fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE}
 
 management:
   endpoints:

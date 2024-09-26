@@ -13,20 +13,24 @@ info:
 
 spring:
   application:
-    name: category-service
+    name: file-service
 
   profiles:
     active: dev
 
-    data:
-      mongodb:
-        uri: ${DATABASE_URI}
-
-  jpa:
-    open-in-view: false
+  servlet:
+    multipart:
+      max-request-size: 15MB
+      max-file-size: 15MB
 
   config:
     import: configserver:http://localhost:8888/
+
+file:
+  server-path: ${FILE_SERVER_PATH}
+  client-path: /file/**
+  base-uri: ${FILE_BASE_URI}
+  download-uri: ${FILE_DOWNLOAD_URI}
 
 eureka:
   instance:

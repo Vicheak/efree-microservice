@@ -1,17 +1,15 @@
-package com.efree.product.api;
+package com.efree.fileservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableScheduling
 @RefreshScope
 @SpringBootApplication
-public class ProductApplication {
+public class FileserviceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ProductApplication.class, args);
+		SpringApplication.run(FileserviceApplication.class, args);
 	}
 
 }
