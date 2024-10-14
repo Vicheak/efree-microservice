@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.efree.fileservice</groupId>
-	<artifactId>fileservice</artifactId>
+	<artifactId>file-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>fileservice</name>
+	<name>file-service</name>
 	<description>file service</description>
 	<url/>
 	<licenses>

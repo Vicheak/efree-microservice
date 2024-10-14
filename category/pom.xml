@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.efree.category</groupId>
-	<artifactId>category</artifactId>
+	<artifactId>category-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>category</name>
+	<name>category-service</name>
 	<description>category service</description>
 	<url/>
 	<licenses>
