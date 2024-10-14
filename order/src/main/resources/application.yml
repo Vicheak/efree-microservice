@@ -1,0 +1,58 @@
+server:
+  port: ${SERVER_PORT}
+
+application:
+  title: ${APP_TITLE}
+  version: ${APP_VERSION}
+
+info:
+  app:
+    name: ${APP_TITLE}
+    description: ${APP_TITLE} ${APP_VERSION}
+    version: ${APP_VERSION}
+
+spring:
+  application:
+    name: order-service
+
+  profiles:
+    active: dev
+
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  config:
+    import: configserver:http://localhost:8888/
+
+eureka:
+  instance:
+    preferIpAddress: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS}
+
+  client:
+    register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA}
+    fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+  info:
+    env:
+      enabled: true
