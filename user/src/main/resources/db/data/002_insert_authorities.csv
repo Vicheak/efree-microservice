@@ -1,0 +1,9 @@
+authority_id,authority_name
+1,user:read
+2,user:write
+3,user:update
+4,user:delete
+5,category:read
+6,category:write
+7,category:update
+8,category:delete

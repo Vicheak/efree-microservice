@@ -35,6 +35,10 @@ spring:
   config:
     import: configserver:http://localhost:8888/
 
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: false
+
 eureka:
   instance:
     preferIpAddress: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS}

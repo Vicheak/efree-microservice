@@ -20,8 +20,8 @@ import java.util.List;
 public class User {
 
     @Id
-    @Column(name = "user_id")
-    String id;
+    @Column(name = "user_uuid")
+    String uuid;
 
     @Column(name = "user_username", length = 50, unique = true, nullable = false)
     String username;
@@ -41,9 +41,6 @@ public class User {
     @Temporal(TemporalType.DATE)
     @Column(name = "user_date_of_birth")
     LocalDate dateOfBirth;
-
-    @Column(name = "user_photo")
-    String photo;
 
     @CreationTimestamp
     @Column(name = "user_join_date")
