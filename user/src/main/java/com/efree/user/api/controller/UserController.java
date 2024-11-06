@@ -3,6 +3,8 @@ package com.efree.user.api.controller;
 import com.efree.user.api.base.BaseApi;
 import com.efree.user.api.dto.request.IsEnabledDto;
 import com.efree.user.api.dto.request.TransactionUserDto;
+import com.efree.user.api.dto.request.UpdateVerifiedCodeDto;
+import com.efree.user.api.dto.request.VerifyDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.service.UserService;
 import jakarta.validation.Valid;
@@ -48,16 +50,17 @@ public class UserController {
                 .build();
     }
 
+    //FOR CALL INTERNAL SERVICE
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public BaseApi<?> createNewUser(@RequestBody @Valid TransactionUserDto transactionUserDto) {
 
-        userService.createNewUser(transactionUserDto);
+        String userUuid = userService.createNewUser(transactionUserDto);
 
         return BaseApi.builder()
                 .isSuccess(true)
                 .code(HttpStatus.CREATED.value())
-                .message("A user has been created successfully!")
+                .message(userUuid) //USE FOR REF
                 .timestamp(LocalDateTime.now())
                 .payload("No response payload")
                 .build();
@@ -108,6 +111,21 @@ public class UserController {
                 .timestamp(LocalDateTime.now())
                 .payload("No response payload")
                 .build();
+    }
+
+    //FOR CALL INTERNAL SERVICE
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/verifiedCode/{uuid}")
+    public Boolean updateVerifiedCodeByUuid(@PathVariable String uuid,
+                                            @RequestBody @Valid UpdateVerifiedCodeDto updateVerifiedCodeDto){
+        return userService.updateVerifiedCodeByUuid(uuid, updateVerifiedCodeDto);
+    }
+
+    //FOR CALL INTERNAL SERVICE
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/verifyUser")
+    public Boolean verify(@RequestBody @Valid VerifyDto verifyDto){
+        return userService.verify(verifyDto);
     }
 
 }

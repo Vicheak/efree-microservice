@@ -1,6 +1,8 @@
 package com.efree.user.api.service;
 
 import com.efree.user.api.dto.request.TransactionUserDto;
+import com.efree.user.api.dto.request.UpdateVerifiedCodeDto;
+import com.efree.user.api.dto.request.VerifyDto;
 import com.efree.user.api.dto.response.UserDto;
 
 import java.util.List;
@@ -24,7 +26,7 @@ public interface UserService {
      * This method is used to create new user (ADMIN authority)
      * @param transactionUserDto is the request from client
      */
-    void createNewUser(TransactionUserDto transactionUserDto);
+    String createNewUser(TransactionUserDto transactionUserDto);
 
     /**
      * This method is used to update specific user by uuid
@@ -45,5 +47,13 @@ public interface UserService {
      * @param isEnabled is the request from client
      */
     void updateUserIsEnabledByUuid(String uuid, Boolean isEnabled);
+
+    Boolean updateVerifiedCodeByUuid(String uuid, UpdateVerifiedCodeDto updateVerifiedCodeDto);
+
+    /**
+     * This method is used to verify the email via verification code
+     * @param verifyDto is the request from client
+     */
+    Boolean verify(VerifyDto verifyDto);
 
 }

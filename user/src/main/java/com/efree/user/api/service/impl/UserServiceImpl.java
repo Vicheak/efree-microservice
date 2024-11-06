@@ -2,6 +2,8 @@ package com.efree.user.api.service.impl;
 
 import com.efree.user.api.dto.mapper.UserMapper;
 import com.efree.user.api.dto.request.TransactionUserDto;
+import com.efree.user.api.dto.request.UpdateVerifiedCodeDto;
+import com.efree.user.api.dto.request.VerifyDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.entity.Role;
 import com.efree.user.api.entity.User;
@@ -50,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void createNewUser(TransactionUserDto transactionUserDto) {
+    public String createNewUser(TransactionUserDto transactionUserDto) {
         if (Objects.isNull(transactionUserDto.roleIds()) || transactionUserDto.roleIds().isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "User must have at least one role!");
@@ -67,9 +69,9 @@ public class UserServiceImpl implements UserService {
 
         User user = setupNewUser(transactionUserDto);
 
-        //enable the permission
-        user.setIsVerified(true);
-        user.setIsEnabled(true);
+        //disable the permission
+        user.setIsVerified(false);
+        user.setIsEnabled(false);
 
         List<UserRole> userRoles = new ArrayList<>();
 
@@ -85,8 +87,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         userRoleRepository.saveAll(userRoles);
+
+        return user.getUuid();
     }
 
+    @Transactional
     @Override
     public void updateUserByUuid(String uuid, TransactionUserDto transactionUserDto) {
         //load the user by uuid
@@ -179,6 +184,35 @@ public class UserServiceImpl implements UserService {
         user.setIsEnabled(isEnabled);
 
         userRepository.save(user);
+    }
+
+    @Transactional
+    @Override
+    public Boolean updateVerifiedCodeByUuid(String uuid, UpdateVerifiedCodeDto updateVerifiedCodeDto) {
+        //update verification code
+        userRepository.updateVerifiedCode(uuid, updateVerifiedCodeDto.email(), updateVerifiedCodeDto.verifiedCode());
+        return true;
+    }
+
+    @Transactional
+    @Override
+    public Boolean verify(VerifyDto verifyDto) {
+        //load the unverified user by email and verified code
+        Optional<User> verifiedUserOptional = userRepository.findByEmailAndVerifiedCodeAndIsVerifiedFalseAndIsEnabledFalse(
+                        verifyDto.email(), verifyDto.verifiedCode());
+
+        if(verifiedUserOptional.isPresent()){
+            User verifiedUser = verifiedUserOptional.get();
+
+            //make the user verified
+            verifiedUser.setIsVerified(true);
+            verifiedUser.setIsEnabled(true);
+            verifiedUser.setVerifiedCode(null);
+
+            userRepository.save(verifiedUser);
+        }
+
+        return verifiedUserOptional.isPresent();
     }
 
     private @NonNull List<UserRole> updateUserRolesTransaction(@NonNull User user, @NonNull Set<Integer> roleIds) {
