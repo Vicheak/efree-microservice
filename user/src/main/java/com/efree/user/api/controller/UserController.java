@@ -5,6 +5,7 @@ import com.efree.user.api.dto.request.IsEnabledDto;
 import com.efree.user.api.dto.request.TransactionUserDto;
 import com.efree.user.api.dto.request.UpdateVerifiedCodeDto;
 import com.efree.user.api.dto.request.VerifyDto;
+import com.efree.user.api.dto.response.AuthUserDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.service.UserService;
 import jakarta.validation.Valid;
@@ -126,6 +127,13 @@ public class UserController {
     @PostMapping("/verifyUser")
     public Boolean verify(@RequestBody @Valid VerifyDto verifyDto){
         return userService.verify(verifyDto);
+    }
+
+    //FOR CALL INTERNAL SERVICE
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/authUser/{email}")
+    public AuthUserDto loadAuthUserByEmail(@PathVariable String email){
+        return userService.loadAuthUserByEmail(email);
     }
 
 }

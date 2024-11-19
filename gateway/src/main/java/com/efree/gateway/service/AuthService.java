@@ -6,22 +6,23 @@ import com.efree.gateway.dto.request.RegisterDto;
 import com.efree.gateway.dto.request.VerifyDto;
 import com.efree.gateway.dto.response.AuthDto;
 import jakarta.mail.MessagingException;
+import reactor.core.publisher.Mono;
 
 public interface AuthService {
 
     /**
      * This method is used to authenticate a valid user
      * @param loginDto is the request from client
-     * @return AuthDto
+     * @return Mono<AuthDto>
      */
-    AuthDto login(LoginDto loginDto);
+    Mono<AuthDto> login(LoginDto loginDto);
 
     /**
      * This method is used to generate new access token after expiration
      * @param refreshTokenDto is the request from client
-     * @return AuthDto
+     * @return Mono<AuthDto>
      */
-    AuthDto refreshToken(RefreshTokenDto refreshTokenDto);
+    Mono<AuthDto> refreshToken(RefreshTokenDto refreshTokenDto);
 
     /**
      * This method is used to register a user for the default role CUSTOMER

@@ -1,6 +1,8 @@
 package com.efree.gateway.external.userservice;
+
 import com.efree.gateway.base.BaseApi;
 import com.efree.gateway.dto.request.VerifyDto;
+import com.efree.gateway.external.userservice.dto.AuthUserDto;
 import com.efree.gateway.external.userservice.dto.TransactionUserDto;
 import com.efree.gateway.external.userservice.dto.UpdateVerifiedCodeDto;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +16,7 @@ public class UserServiceRestClientConsumer {
 
     private final UserServiceRestClient userServiceRestClient;
 
-    public BaseApi<String> createNewUser(TransactionUserDto transactionUserDto){
+    public BaseApi<String> createNewUser(TransactionUserDto transactionUserDto) {
         //validate role in service user
         //@TODO
 
@@ -23,12 +25,16 @@ public class UserServiceRestClientConsumer {
         return userServiceRestClient.createNewUser(transactionUserDto);
     }
 
-    public Boolean updateVerifiedCodeUser(String uuid, UpdateVerifiedCodeDto updateVerifiedCodeDto){
+    public Boolean updateVerifiedCodeUser(String uuid, UpdateVerifiedCodeDto updateVerifiedCodeDto) {
         return userServiceRestClient.updateVerifiedCodeByUuid(uuid, updateVerifiedCodeDto);
     }
 
-    public Boolean verify(VerifyDto verifyDto){
+    public Boolean verify(VerifyDto verifyDto) {
         return userServiceRestClient.verify(verifyDto);
+    }
+
+    public AuthUserDto loadAuthUserByEmail(String email) {
+        return userServiceRestClient.loadAuthUserByEmail(email);
     }
 
 }

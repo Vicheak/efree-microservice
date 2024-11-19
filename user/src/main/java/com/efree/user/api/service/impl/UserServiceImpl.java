@@ -4,6 +4,7 @@ import com.efree.user.api.dto.mapper.UserMapper;
 import com.efree.user.api.dto.request.TransactionUserDto;
 import com.efree.user.api.dto.request.UpdateVerifiedCodeDto;
 import com.efree.user.api.dto.request.VerifyDto;
+import com.efree.user.api.dto.response.AuthUserDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.entity.Role;
 import com.efree.user.api.entity.User;
@@ -199,9 +200,9 @@ public class UserServiceImpl implements UserService {
     public Boolean verify(VerifyDto verifyDto) {
         //load the unverified user by email and verified code
         Optional<User> verifiedUserOptional = userRepository.findByEmailAndVerifiedCodeAndIsVerifiedFalseAndIsEnabledFalse(
-                        verifyDto.email(), verifyDto.verifiedCode());
+                verifyDto.email(), verifyDto.verifiedCode());
 
-        if(verifiedUserOptional.isPresent()){
+        if (verifiedUserOptional.isPresent()) {
             User verifiedUser = verifiedUserOptional.get();
 
             //make the user verified
@@ -213,6 +214,26 @@ public class UserServiceImpl implements UserService {
         }
 
         return verifiedUserOptional.isPresent();
+    }
+
+    @Override
+    public AuthUserDto loadAuthUserByEmail(String email) {
+        Optional<User> authUserOptional = userRepository.findByEmailAndIsVerifiedTrueAndIsEnabledTrue(email);
+
+        if (authUserOptional.isEmpty()) return null;
+        User authUser = authUserOptional.get();
+        AuthUserDto authUserDto = userMapper.fromUserToAuthUserDto(authUser);
+
+        //set up granted authorities
+        List<String> authorities = new ArrayList<>();
+        authUser.getUserRoles().forEach(userRole -> {
+            authorities.add("ROLE_" + userRole.getRole().getName());
+            userRole.getRole().getAuthorities().forEach(authority ->
+                    authorities.add(authority.getName()));
+        });
+        authUserDto.setGrantedAuthorities(authorities);
+
+        return authUserDto;
     }
 
     private @NonNull List<UserRole> updateUserRolesTransaction(@NonNull User user, @NonNull Set<Integer> roleIds) {

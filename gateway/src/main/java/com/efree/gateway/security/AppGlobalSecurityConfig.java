@@ -1,52 +1,129 @@
 package com.efree.gateway.security;
 
+import com.efree.gateway.util.KeyUtil;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+
+import java.util.UUID;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebFluxSecurity
 @RequiredArgsConstructor
 public class AppGlobalSecurityConfig {
 
-    private final UserDetailsService userDetailsService;
+    private final ReactiveUserDetailsService userDetailsServiceImpl;
     private final PasswordEncoder passwordEncoder;
+    private final KeyUtil keyUtil;
 
-    @Bean
-    public AuthenticationProvider authenticationProviderConfig() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return provider;
+    @Primary
+    @Bean("reactiveAuthenticationManager")
+    public ReactiveAuthenticationManager reactiveAuthenticationManager() {
+        UserDetailsRepositoryReactiveAuthenticationManager authManager =
+                new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsServiceImpl);
+        authManager.setPasswordEncoder(passwordEncoder);
+        return authManager;
+    }
+
+    @Bean("jwtReactiveAuthenticationManager")
+    public ReactiveAuthenticationManager jwtReactiveAuthenticationManager() {
+        return new JwtReactiveAuthenticationManager(jwtRefreshTokenDecoder());
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChainConfig(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> {
-           auth.requestMatchers("/gateway/api/v1/auth/**").permitAll();
+    public SecurityWebFilterChain securityWebFilterChainConfig(ServerHttpSecurity http) {
+        http.authorizeExchange(exchange -> {
+            exchange.pathMatchers(
+                    "/gateway/api/v1/auth/**",
+                    "/actuator/**").permitAll();
 
-           auth.anyRequest().authenticated();
+            //USER SERVICE
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/**").hasAuthority("SCOPE_user:read");
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/**").hasAuthority("SCOPE_user:write");
+            exchange.pathMatchers(HttpMethod.PUT, "/gateway/USER/**").hasAuthority("SCOPE_user:update");
+            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/USER/**").hasAuthority("SCOPE_user:update");
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/USER/**").hasAuthority("SCOPE_user:delete");
+
+            exchange.anyExchange().authenticated();
         });
 
-        http.httpBasic(Customizer.withDefaults());
+        http.oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(Customizer.withDefaults()));
 
-        http.csrf(AbstractHttpConfigurer::disable);
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable);
 
-        http.sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.securityContextRepository(NoOpServerSecurityContextRepository.getInstance());
 
         return http.build();
+    }
+
+    //access token beans
+    @Bean
+    @Primary
+    public JWKSource<SecurityContext> jwkSource() {
+        JWK jwk = new RSAKey.Builder(keyUtil.getAccessTokenPublicKey())
+                .privateKey(keyUtil.getAccessTokenPrivateKey())
+                .keyID(UUID.randomUUID().toString())
+                .build();
+
+        var jwkSet = new JWKSet(jwk);
+        return (jwkSelector, context) -> jwkSelector.select(jwkSet);
+    }
+
+    @Bean
+    @Primary
+    public ReactiveJwtDecoder jwtDecoder() {
+        return NimbusReactiveJwtDecoder.withPublicKey(keyUtil.getAccessTokenPublicKey()).build();
+    }
+
+    @Bean
+    @Primary
+    public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
+        return new NimbusJwtEncoder(jwkSource);
+    }
+
+    //refresh token beans
+    @Bean("refreshTokenJwkSource")
+    public JWKSource<SecurityContext> refreshTokenJwkSource() {
+        JWK jwk = new RSAKey.Builder(keyUtil.getRefreshTokenPublicKey())
+                .privateKey(keyUtil.getRefreshTokenPrivateKey())
+                .keyID(UUID.randomUUID().toString())
+                .build();
+
+        var jwkSet = new JWKSet(jwk);
+        return (jwkSelector, context) -> jwkSelector.select(jwkSet);
+    }
+
+    @Bean("jwtRefreshTokenDecoder")
+    public ReactiveJwtDecoder jwtRefreshTokenDecoder() {
+        return NimbusReactiveJwtDecoder.withPublicKey(keyUtil.getRefreshTokenPublicKey()).build();
+    }
+
+    @Bean("jwtRefreshTokenEncoder")
+    public JwtEncoder jwtRefreshTokenEncoder(@Qualifier("refreshTokenJwkSource") JWKSource<SecurityContext> jwkSource) {
+        return new NimbusJwtEncoder(jwkSource);
     }
 
 }

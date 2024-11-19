@@ -1,6 +1,6 @@
 package com.efree.gateway.security;
 
-import com.efree.gateway.security.globalentity.User;
+import com.efree.gateway.external.userservice.dto.AuthUserDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +11,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -21,17 +21,17 @@ import java.util.Set;
 @Slf4j
 public class CustomUserDetails implements UserDetails {
 
-    private User user;
+    private AuthUserDto user;
 
+    //using permission-based authorities and authorization
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+        Set<SimpleGrantedAuthority> authorities = user.getGrantedAuthorities().stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toSet());
 
-        user.getUserRoles().forEach(userRole -> {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + userRole.getRole().getName()));
-            userRole.getRole().getAuthorities().forEach(authority ->
-                authorities.add(new SimpleGrantedAuthority(authority.getName())));
-        });
+        log.info("User auth : {}", user.getGrantedAuthorities()
+                .stream().sorted().toList());
 
         return authorities;
     }
@@ -50,6 +50,7 @@ public class CustomUserDetails implements UserDetails {
     public boolean isAccountNonExpired() {
         return user.getAccountNonExpired();
     }
+
     @Override
     public boolean isAccountNonLocked() {
         return user.getAccountNonLocked();

@@ -3,7 +3,9 @@ package com.efree.user.api.service;
 import com.efree.user.api.dto.request.TransactionUserDto;
 import com.efree.user.api.dto.request.UpdateVerifiedCodeDto;
 import com.efree.user.api.dto.request.VerifyDto;
+import com.efree.user.api.dto.response.AuthUserDto;
 import com.efree.user.api.dto.response.UserDto;
+import com.efree.user.api.entity.User;
 
 import java.util.List;
 
@@ -55,5 +57,7 @@ public interface UserService {
      * @param verifyDto is the request from client
      */
     Boolean verify(VerifyDto verifyDto);
+
+    AuthUserDto loadAuthUserByEmail(String email);
 
 }
