@@ -19,7 +19,24 @@ spring:
     active: dev
 
   config:
-    import: configserver:http://localhost:8888/
+    import: optional:configserver:http://localhost:8888/
+
+#  security:
+#    user:
+#      name: efree
+#      password: efree@123
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+  main:
+#    web-application-type: servlet #FOR SERVLET-BASED GATEWAY
+    web-application-type: reactive #FOR REACTIVE GATEWAY
+    allow-bean-definition-overriding: true #OVERRIDE WebSecurityConfiguration
 
 eureka:
   instance:
@@ -39,6 +56,25 @@ management:
   endpoint:
     shutdown:
       enabled: true
+    gateway:
+      enabled: true
   info:
     env:
       enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        security=DEBUG:
+
+rest:
+  user-service:
+    base-url: ${USER_SERVICE_BASE_URL}
+
+access-token:
+  private: ${ACCESS_TOKEN_PRIVATE}
+  public: ${ACCESS_TOKEN_PUBLIC}
+refresh-token:
+  private: ${REFRESH_TOKEN_PRIVATE}
+  public: ${REFRESH_TOKEN_PUBLIC}

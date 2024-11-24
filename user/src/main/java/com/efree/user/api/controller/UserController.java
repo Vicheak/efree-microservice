@@ -3,6 +3,8 @@ package com.efree.user.api.controller;
 import com.efree.user.api.base.BaseApi;
 import com.efree.user.api.dto.request.IsEnabledDto;
 import com.efree.user.api.dto.request.TransactionUserDto;
+import com.efree.user.api.dto.response.AuthProfileUserDto;
+import com.efree.user.api.dto.response.AuthUserDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.service.UserService;
 import jakarta.validation.Valid;
@@ -108,6 +110,19 @@ public class UserController {
                 .timestamp(LocalDateTime.now())
                 .payload("No response payload")
                 .build();
+    }
+
+    //FOR CALL INTERNAL SERVICE
+    @GetMapping("/me/{email}")
+    public AuthProfileUserDto loadUserProfile(@PathVariable String email) {
+        return userService.loadUserProfile(email);
+    }
+
+    //FOR CALL INTERNAL SERVICE
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/authUser/{email}")
+    public AuthUserDto loadAuthUserByEmail(@PathVariable String email){
+        return userService.loadAuthUserByEmail(email);
     }
 
 }

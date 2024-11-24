@@ -1,6 +1,8 @@
 package com.efree.user.api.service;
 
 import com.efree.user.api.dto.request.TransactionUserDto;
+import com.efree.user.api.dto.response.AuthProfileUserDto;
+import com.efree.user.api.dto.response.AuthUserDto;
 import com.efree.user.api.dto.response.UserDto;
 
 import java.util.List;
@@ -45,5 +47,15 @@ public interface UserService {
      * @param isEnabled is the request from client
      */
     void updateUserIsEnabledByUuid(String uuid, Boolean isEnabled);
+
+    /**
+     * This method is used to load user profile by authenticated user
+     * @param email is the path parameter from client
+     * @return AuthProfileUserDto
+     */
+    AuthProfileUserDto loadUserProfile(String email);
+
+
+    AuthUserDto loadAuthUserByEmail(String email);
 
 }
