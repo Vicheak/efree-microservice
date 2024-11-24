@@ -2,8 +2,7 @@ package com.efree.user.api.service.impl;
 
 import com.efree.user.api.dto.mapper.UserMapper;
 import com.efree.user.api.dto.request.TransactionUserDto;
-import com.efree.user.api.dto.request.UpdateVerifiedCodeDto;
-import com.efree.user.api.dto.request.VerifyDto;
+import com.efree.user.api.dto.response.AuthProfileUserDto;
 import com.efree.user.api.dto.response.AuthUserDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.entity.Role;
@@ -18,6 +17,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,6 +33,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<UserDto> loadAllUsers() {
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public String createNewUser(TransactionUserDto transactionUserDto) {
+    public void createNewUser(TransactionUserDto transactionUserDto) {
         if (Objects.isNull(transactionUserDto.roleIds()) || transactionUserDto.roleIds().isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "User must have at least one role!");
@@ -88,8 +89,6 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         userRoleRepository.saveAll(userRoles);
-
-        return user.getUuid();
     }
 
     @Transactional
@@ -187,33 +186,21 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    @Transactional
     @Override
-    public Boolean updateVerifiedCodeByUuid(String uuid, UpdateVerifiedCodeDto updateVerifiedCodeDto) {
-        //update verification code
-        userRepository.updateVerifiedCode(uuid, updateVerifiedCodeDto.email(), updateVerifiedCodeDto.verifiedCode());
-        return true;
-    }
+    public AuthProfileUserDto loadUserProfile(String email) {
+        //load authenticated user object
+        User authenticatedUser = userRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                                "Email has not been authenticated!")
+                );
 
-    @Transactional
-    @Override
-    public Boolean verify(VerifyDto verifyDto) {
-        //load the unverified user by email and verified code
-        Optional<User> verifiedUserOptional = userRepository.findByEmailAndVerifiedCodeAndIsVerifiedFalseAndIsEnabledFalse(
-                verifyDto.email(), verifyDto.verifiedCode());
+        AuthProfileUserDto authProfileUserDto = userMapper.fromUserToAuthProfileUserDto(authenticatedUser);
 
-        if (verifiedUserOptional.isPresent()) {
-            User verifiedUser = verifiedUserOptional.get();
+        //set up granted authorities
+        authProfileUserDto.setGrantedAuthorities(buildGrantedAuthorities(authenticatedUser));
 
-            //make the user verified
-            verifiedUser.setIsVerified(true);
-            verifiedUser.setIsEnabled(true);
-            verifiedUser.setVerifiedCode(null);
-
-            userRepository.save(verifiedUser);
-        }
-
-        return verifiedUserOptional.isPresent();
+        return authProfileUserDto;
     }
 
     @Override
@@ -225,15 +212,19 @@ public class UserServiceImpl implements UserService {
         AuthUserDto authUserDto = userMapper.fromUserToAuthUserDto(authUser);
 
         //set up granted authorities
+        authUserDto.setGrantedAuthorities(buildGrantedAuthorities(authUser));
+
+        return authUserDto;
+    }
+
+    private List<String> buildGrantedAuthorities(User authUser){
         List<String> authorities = new ArrayList<>();
         authUser.getUserRoles().forEach(userRole -> {
             authorities.add("ROLE_" + userRole.getRole().getName());
             userRole.getRole().getAuthorities().forEach(authority ->
                     authorities.add(authority.getName()));
         });
-        authUserDto.setGrantedAuthorities(authorities);
-
-        return authUserDto;
+        return authorities;
     }
 
     private @NonNull List<UserRole> updateUserRolesTransaction(@NonNull User user, @NonNull Set<Integer> roleIds) {
@@ -281,8 +272,7 @@ public class UserServiceImpl implements UserService {
         user.setAccountNonExpired(true);
         user.setAccountNonLocked(true);
         user.setIsEnabled(false);
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setEncryptedPassword(transactionUserDto.password());
+        user.setEncryptedPassword(passwordEncoder.encode(transactionUserDto.password()));
         return user;
     }
 

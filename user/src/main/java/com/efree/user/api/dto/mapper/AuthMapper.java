@@ -1,7 +1,7 @@
-package com.efree.gateway.dto.mapper;
+package com.efree.user.api.dto.mapper;
 
-import com.efree.gateway.dto.request.RegisterDto;
-import com.efree.gateway.external.userservice.dto.TransactionUserDto;
+import com.efree.user.api.dto.request.RegisterDto;
+import com.efree.user.api.dto.request.TransactionUserDto;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")

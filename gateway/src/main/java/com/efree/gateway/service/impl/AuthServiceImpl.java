@@ -1,34 +1,27 @@
 package com.efree.gateway.service.impl;
 
-import com.efree.gateway.base.BaseApi;
 import com.efree.gateway.constant.AppGlobalConstant;
-import com.efree.gateway.dto.mapper.AuthMapper;
 import com.efree.gateway.dto.request.*;
 import com.efree.gateway.dto.response.AuthDto;
-import com.efree.gateway.external.mail.MailServiceClient;
-import com.efree.gateway.external.userservice.UserServiceRestClientConsumer;
-import com.efree.gateway.external.userservice.dto.TransactionUserDto;
-import com.efree.gateway.external.userservice.dto.UpdateVerifiedCodeDto;
+import com.efree.gateway.dto.response.AuthProfileUserDto;
+import com.efree.gateway.external.userservice.UserServiceWebClient;
 import com.efree.gateway.service.AuthService;
-import com.efree.gateway.util.RandomUtil;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -41,10 +34,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final MailServiceClient mailServiceClient;
-    private final UserServiceRestClientConsumer userServiceRestClientConsumer;
-    private final AuthMapper authMapper;
-    private final PasswordEncoder passwordEncoder;
+    private final UserServiceWebClient userServiceWebClient;
     private ReactiveAuthenticationManager authenticationManager;
     private ReactiveAuthenticationManager jwtReactiveAuthenticationManager;
     private final JwtEncoder jwtEncoder;
@@ -64,9 +54,6 @@ public class AuthServiceImpl implements AuthService {
     public void setJwtRefreshTokenEncoder(@Qualifier("jwtRefreshTokenEncoder") JwtEncoder jwtRefreshTokenEncoder) {
         this.jwtRefreshTokenEncoder = jwtRefreshTokenEncoder;
     }
-
-    @Value("${mail.subject}")
-    private String mailSubject;
 
     @Override
     public Mono<AuthDto> login(LoginDto loginDto) {
@@ -97,10 +84,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Mono<AuthDto> refreshToken(RefreshTokenDto refreshTokenDto) {
-        //Authenticate the refresh token using bearer token authentication
+        //authenticate the refresh token using bearer token authentication
         Authentication auth = new BearerTokenAuthenticationToken(refreshTokenDto.refreshToken());
 
-        //Authenticate reactively without blocking
+        //authenticate reactively without blocking
         return jwtReactiveAuthenticationManager.authenticate(auth)
                 .flatMap(authenticated -> {
                     Jwt jwt = (Jwt) authenticated.getPrincipal();
@@ -128,6 +115,15 @@ public class AuthServiceImpl implements AuthService {
                 });
     }
 
+    @Override
+    public Mono<AuthProfileUserDto> loadUserProfile() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .cast(JwtAuthenticationToken.class)
+                .map(JwtAuthenticationToken::getToken) //extract JWT object
+                .flatMap(jwt -> userServiceWebClient.loadAuthUserProfile(jwt.getId()))
+                .switchIfEmpty(Mono.error(new IllegalStateException("No authentication found in context")));
+    }
 
     private String generateAccessToken(GenerateTokenDto generateTokenDto) {
         JwtClaimsSet jwtClaimsSet = JwtClaimsSet.builder()
@@ -169,41 +165,6 @@ public class AuthServiceImpl implements AuthService {
             return jwtRefreshTokenEncoder.encode(JwtEncoderParameters.from(jwtRefreshTokenClaimsSet)).getTokenValue();
         }
         return generateTokenDto.previousToken();
-    }
-
-    @Override
-    public void register(RegisterDto registerDto) throws MessagingException {
-        //map from registerDto to transactionUserDto
-        TransactionUserDto transactionUserDto =
-                authMapper.fromRegisterDtoToTransactionUserDto(registerDto);
-        //encrypt the raw password
-        transactionUserDto.setPassword(passwordEncoder.encode(transactionUserDto.getPassword()));
-
-        BaseApi<String> baseUserServiceResponse =
-                userServiceRestClientConsumer.createNewUser(transactionUserDto);
-        if (baseUserServiceResponse.isSuccess()) {
-            //update verification code
-            String userUuid = baseUserServiceResponse.message();
-            //generate six random digit for verification code
-            String verifiedCode = RandomUtil.getRandomNumber();
-            UpdateVerifiedCodeDto updateVerifiedCodeDto = new UpdateVerifiedCodeDto(transactionUserDto.getEmail(), verifiedCode);
-            boolean isStatusSuccess =
-                    userServiceRestClientConsumer.updateVerifiedCodeUser(userUuid, updateVerifiedCodeDto);
-
-            //send verified code to user's email asynchronously
-            if (isStatusSuccess) {
-                mailServiceClient.buildAndSendMailAsync(transactionUserDto.getEmail(), mailSubject, verifiedCode);
-            }
-        }
-    }
-
-    @Override
-    public void verify(VerifyDto verifyDto) {
-        boolean isVerifiedSuccess = userServiceRestClientConsumer.verify(verifyDto);
-        if (!isVerifiedSuccess) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "Email verification has been failed!");
-        }
     }
 
 }

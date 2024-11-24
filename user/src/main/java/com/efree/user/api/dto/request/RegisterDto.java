@@ -1,4 +1,4 @@
-package com.efree.gateway.dto.request;
+package com.efree.user.api.dto.request;
 
 import jakarta.validation.constraints.*;
 

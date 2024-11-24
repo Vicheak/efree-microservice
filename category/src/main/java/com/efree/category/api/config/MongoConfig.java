@@ -37,29 +37,35 @@ public class MongoConfig extends AbstractMongoClientConfiguration {
 
     @Override
     protected String getDatabaseName() {
-        return Objects.nonNull(this.database) ? this.database : "efree_mongodb";
+        return Objects.nonNull(this.database) ? this.database : "efree_db";
     }
 
     @Override
     public MongoClient mongoClient() {
-        this.host = Objects.nonNull(this.host) ? this.host : "34.87.163.126";
-        this.port = Objects.nonNull(this.port) ? this.port : 5201;
-        this.username = Objects.nonNull(this.username) ? this.username : "efree";
-        this.password = Objects.nonNull(this.password) ? this.password : "efree@123";
-        this.authSource = Objects.nonNull(this.authSource) ? this.authSource : "admin";
+        // USE THIS CONFIG ON PRODUCTION
+//        this.host = Objects.nonNull(this.host) ? this.host : "34.87.163.126";
+//        this.port = Objects.nonNull(this.port) ? this.port : 5201;
+//        this.username = Objects.nonNull(this.username) ? this.username : "efree";
+//        this.password = Objects.nonNull(this.password) ? this.password : "efree@123";
+//        this.authSource = Objects.nonNull(this.authSource) ? this.authSource : "admin";
 
         //URL encode username and password
-        try {
-            String encodedUsername = URLEncoder.encode(this.username, StandardCharsets.UTF_8.toString());
-            String encodedPassword = URLEncoder.encode(this.password, StandardCharsets.UTF_8.toString());
+//        try {
+//            String encodedUsername = URLEncoder.encode(this.username, StandardCharsets.UTF_8.toString());
+//            String encodedPassword = URLEncoder.encode(this.password, StandardCharsets.UTF_8.toString());
+//
+//            //build connection string with encoded username and password
+//            this.connectionString = "mongodb://%s:%s@%s:%d/%s?authSource=%s".formatted(
+//                    encodedUsername, encodedPassword, this.host, this.port, this.getDatabaseName(), this.authSource);
+//        } catch (UnsupportedEncodingException e) {
+//            log.error("Failed to encode username or password", e);
+//            throw new RuntimeException("Failed to encode username or password", e);
+//        }
 
-            //build connection string with encoded username and password
-            this.connectionString = "mongodb://%s:%s@%s:%d/%s?authSource=%s".formatted(
-                    encodedUsername, encodedPassword, this.host, this.port, this.getDatabaseName(), this.authSource);
-        } catch (UnsupportedEncodingException e) {
-            log.error("Failed to encode username or password", e);
-            throw new RuntimeException("Failed to encode username or password", e);
-        }
+        this.host = Objects.nonNull(this.host) ? this.host : "localhost";
+        this.port = Objects.nonNull(this.port) ? this.port : 27017;
+
+        this.connectionString = "mongodb://%s:%d/%s".formatted(this.host, this.port, this.getDatabaseName());
 
         //log.error("ConnectionString : {}", this.connectionString);
 

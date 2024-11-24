@@ -21,18 +21,6 @@ spring:
   config:
     import: optional:configserver:http://localhost:8888/
 
-  mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-
 #  security:
 #    user:
 #      name: efree
@@ -74,14 +62,6 @@ management:
     env:
       enabled: true
 
-springdoc:
-  swagger-ui:
-    path: /api-docs
-
-#logging:
-#  level:
-#    root: debug
-
 logging:
   level:
     org:
@@ -91,9 +71,6 @@ logging:
 rest:
   user-service:
     base-url: ${USER_SERVICE_BASE_URL}
-
-mail:
-  subject: ${MAIL_SUBJECT}
 
 access-token:
   private: ${ACCESS_TOKEN_PRIVATE}

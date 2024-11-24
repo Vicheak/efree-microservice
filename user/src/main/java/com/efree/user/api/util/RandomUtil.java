@@ -1,4 +1,4 @@
-package com.efree.gateway.util;
+package com.efree.user.api.util;
 
 import java.security.SecureRandom;
 import java.util.Random;

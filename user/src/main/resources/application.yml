@@ -35,6 +35,18 @@ spring:
   config:
     import: configserver:http://localhost:8888/
 
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     enabled: false

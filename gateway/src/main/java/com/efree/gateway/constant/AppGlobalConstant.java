@@ -4,6 +4,5 @@ public final class AppGlobalConstant {
 
     public static final String AUTH_TYPE = "Bearer";
     public static final String JWT_CLAIM_AUTH = "scope";
-    public static final String CLAIM_AUTH = "auth";
 
 }

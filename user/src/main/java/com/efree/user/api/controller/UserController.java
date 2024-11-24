@@ -3,8 +3,7 @@ package com.efree.user.api.controller;
 import com.efree.user.api.base.BaseApi;
 import com.efree.user.api.dto.request.IsEnabledDto;
 import com.efree.user.api.dto.request.TransactionUserDto;
-import com.efree.user.api.dto.request.UpdateVerifiedCodeDto;
-import com.efree.user.api.dto.request.VerifyDto;
+import com.efree.user.api.dto.response.AuthProfileUserDto;
 import com.efree.user.api.dto.response.AuthUserDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.service.UserService;
@@ -51,17 +50,16 @@ public class UserController {
                 .build();
     }
 
-    //FOR CALL INTERNAL SERVICE
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public BaseApi<?> createNewUser(@RequestBody @Valid TransactionUserDto transactionUserDto) {
 
-        String userUuid = userService.createNewUser(transactionUserDto);
+        userService.createNewUser(transactionUserDto);
 
         return BaseApi.builder()
                 .isSuccess(true)
                 .code(HttpStatus.CREATED.value())
-                .message(userUuid) //USE FOR REF
+                .message("A user has been created successfully!")
                 .timestamp(LocalDateTime.now())
                 .payload("No response payload")
                 .build();
@@ -115,18 +113,9 @@ public class UserController {
     }
 
     //FOR CALL INTERNAL SERVICE
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/verifiedCode/{uuid}")
-    public Boolean updateVerifiedCodeByUuid(@PathVariable String uuid,
-                                            @RequestBody @Valid UpdateVerifiedCodeDto updateVerifiedCodeDto){
-        return userService.updateVerifiedCodeByUuid(uuid, updateVerifiedCodeDto);
-    }
-
-    //FOR CALL INTERNAL SERVICE
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping("/verifyUser")
-    public Boolean verify(@RequestBody @Valid VerifyDto verifyDto){
-        return userService.verify(verifyDto);
+    @GetMapping("/me/{email}")
+    public AuthProfileUserDto loadUserProfile(@PathVariable String email) {
+        return userService.loadUserProfile(email);
     }
 
     //FOR CALL INTERNAL SERVICE

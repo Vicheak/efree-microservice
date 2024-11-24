@@ -56,15 +56,24 @@ public class AppGlobalSecurityConfig {
     public SecurityWebFilterChain securityWebFilterChainConfig(ServerHttpSecurity http) {
         http.authorizeExchange(exchange -> {
             exchange.pathMatchers(
-                    "/gateway/api/v1/auth/**",
-                    "/actuator/**").permitAll();
+                    // For external resources
+                    "/gateway/api/v1/auth/login",
+                    "/gateway/api/v1/auth/refreshToken").permitAll();
+
+            exchange.pathMatchers(HttpMethod.POST,
+                    "/gateway/USER/api/v1/auth/**",
+                    "/gateway/user/api/v1/auth/**",
+                    "/user-service/api/v1/auth/**").permitAll();
+
+            //ACTUATOR
+            exchange.pathMatchers("/actuator/**").hasAuthority("SCOPE_ROLE_ADMIN");
 
             //USER SERVICE
-            exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/**").hasAuthority("SCOPE_user:read");
-            exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/**").hasAuthority("SCOPE_user:write");
-            exchange.pathMatchers(HttpMethod.PUT, "/gateway/USER/**").hasAuthority("SCOPE_user:update");
-            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/USER/**").hasAuthority("SCOPE_user:update");
-            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/USER/**").hasAuthority("SCOPE_user:delete");
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:read");
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:write");
+            exchange.pathMatchers(HttpMethod.PUT, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:update");
+            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:update");
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:delete");
 
             exchange.anyExchange().authenticated();
         });
