@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
 @Builder
-public record CategoryResponseDto(Long id,
-                                  String name,
-                                  String description,
+public record CategoryResponseDto(String id,
+                                  String nameEn,
+                                  String nameKh,
+                                  String descriptionEn,
+                                  String descriptionKh,
                                   @JsonInclude(JsonInclude.Include.NON_NULL)
                                   String imageUrl,
                                   Boolean isActive) {

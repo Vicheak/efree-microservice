@@ -26,14 +26,17 @@ public class Product {
     @Column(name = "category_id", nullable = false)
     Long categoryId;
 
-    @Column(name = "seller_id")
-    String sellerId;
+    @Column(name = "product_name_en", nullable = false)
+    String nameEn;
 
-    @Column(name = "product_name", nullable = false)
-    String name;
+    @Column(name = "product_name_kh", nullable = false)
+    String nameKh;
 
-    @Column(name = "product_description", columnDefinition = "TEXT")
-    String description;
+    @Column(name = "product_description_en", columnDefinition = "TEXT")
+    String descriptionEn;
+
+    @Column(name = "product_description_kh", columnDefinition = "TEXT")
+    String descriptionKh;
 
     @Column(name = "product_price", nullable = false, precision = 2)
     BigDecimal price;

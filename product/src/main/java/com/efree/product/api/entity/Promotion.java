@@ -19,8 +19,11 @@ public class Promotion {
     @Column(name = "promotion_id")
     String id;
 
-    @Column(name = "promotion_type", length = 100, nullable = false)
-    String type;
+    @Column(name = "promotion_type_en", length = 100, nullable = false)
+    String typeEn;
+
+    @Column(name = "promotion_type_kh", length = 100, nullable = false)
+    String typeKh;
 
     @Column(name = "promotion_discount")
     Double discount;

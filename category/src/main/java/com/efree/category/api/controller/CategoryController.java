@@ -37,14 +37,14 @@ public class CategoryController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    public BaseApi<?> loadCategoryById(@PathVariable Long id) {
+    public BaseApi<?> loadCategoryById(@PathVariable String id) {
 
         CategoryResponseDto categoryResponseDto = categoryService.loadCategoryById(id);
 
         return BaseApi.builder()
                 .isSuccess(true)
                 .code(HttpStatus.OK.value())
-                .message("Category with id, %d loaded successfully!".formatted(id))
+                .message("Category with id, %s loaded successfully!".formatted(id))
                 .timestamp(LocalDateTime.now())
                 .payload(categoryResponseDto)
                 .build();
@@ -67,7 +67,7 @@ public class CategoryController {
 
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/{id}")
-    public BaseApi<?> updateCategoryById(@PathVariable Long id,
+    public BaseApi<?> updateCategoryById(@PathVariable String id,
                                          @RequestBody CategoryRequestDto categoryRequestDto) {
 
         CategoryResponseDto updatedCategoryResponseDto = categoryService.updateCategoryById(id, categoryRequestDto);
@@ -83,7 +83,7 @@ public class CategoryController {
 
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/{id}")
-    public BaseApi<?> deleteCategoryById(@PathVariable Long id) {
+    public BaseApi<?> deleteCategoryById(@PathVariable String id) {
 
         categoryService.deleteCategoryById(id);
 
