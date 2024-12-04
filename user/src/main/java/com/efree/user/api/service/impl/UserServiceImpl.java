@@ -71,9 +71,9 @@ public class UserServiceImpl implements UserService {
 
         User user = setupNewUser(transactionUserDto);
 
-        //disable the permission
-        user.setIsVerified(false);
-        user.setIsEnabled(false);
+        //enable the permission
+        user.setIsVerified(true);
+        user.setIsEnabled(true);
 
         List<UserRole> userRoles = new ArrayList<>();
 

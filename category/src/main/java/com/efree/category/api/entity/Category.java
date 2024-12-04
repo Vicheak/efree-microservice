@@ -1,10 +1,11 @@
 package com.efree.category.api.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Getter
 @Setter
@@ -12,23 +13,30 @@ import org.springframework.data.mongodb.core.mapping.MongoId;
 @AllArgsConstructor
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Document(collection = "categories")
+@Entity
+@Table(name = "categories")
 public class Category {
 
-    @MongoId
-    @Field("category_id")
-    Long id;
+    @Id
+    @Column(name = "category_id")
+    String id;
 
-    @Field("category_name")
-    String name;
+    @Column(name = "category_name_en")
+    String nameEn;
 
-    @Field("category_description")
-    String description;
+    @Column(name = "category_name_kh")
+    String nameKh;
 
-    @Field("category_image_url")
+    @Column(name = "category_description_en")
+    String descriptionEn;
+
+    @Column(name = "category_description_kh")
+    String descriptionKh;
+
+    @Column(name = "category_image_url")
     String imageUrl;
 
-    @Field("category_is_active")
+    @Column(name = "category_is_active")
     Boolean isActive;
 
 }

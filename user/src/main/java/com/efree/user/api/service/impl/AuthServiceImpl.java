@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
         List<UserRole> userRoles = List.of(
                 UserRole.builder()
                         .user(newUser)
-                        .role(Role.builder().id(3).build())
+                        .role(Role.builder().id(2).build())
                         .build()
         );
 

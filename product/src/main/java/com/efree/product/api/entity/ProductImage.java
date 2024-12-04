@@ -20,8 +20,14 @@ public class ProductImage {
     @Column(name = "image_url", nullable = false)
     String imageUrl;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    String description;
+    @Column(name = "description_en", columnDefinition = "TEXT")
+    String descriptionEn;
+
+    @Column(name = "description_kh", columnDefinition = "TEXT")
+    String descriptionKh;
+
+    @Column(name = "is_based")
+    Boolean isBased;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)

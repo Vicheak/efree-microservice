@@ -1,13 +1,15 @@
 package com.efree.category.api.repository;
 
 import com.efree.category.api.entity.Category;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface CategoryRepository extends MongoRepository<Category, Long> {
+public interface CategoryRepository extends JpaRepository<Category, String> {
 
-    boolean existsByNameIsIgnoreCase(String name);
+    boolean existsByNameEnIsIgnoreCase(String nameEn);
+
+    boolean existsByNameKhIsIgnoreCase(String nameKh);
 
     Optional<Category> findFirstByOrderByIdDesc();
 

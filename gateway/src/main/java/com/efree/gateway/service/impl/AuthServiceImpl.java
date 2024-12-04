@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
         //authenticate with email and passwords
         Authentication auth = new UsernamePasswordAuthenticationToken(loginDto.email(), loginDto.password());
 
-        return authenticationManager.authenticate(auth)  //authenticate reactively
+        return authenticationManager.authenticate(auth) //authenticate reactively
                 .flatMap(authenticatedAuth -> {
                     String scope = authenticatedAuth.getAuthorities().stream()
                             .map(GrantedAuthority::getAuthority)
