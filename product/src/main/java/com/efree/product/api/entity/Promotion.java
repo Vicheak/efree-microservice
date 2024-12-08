@@ -1,23 +1,27 @@
 package com.efree.product.api.entity;
 
+import com.efree.product.api.dto.response.PromotionResponse;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "promotions")
 public class Promotion {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "promotion_id")
-    String id;
+    UUID id;
 
     @Column(name = "promotion_type", length = 100, nullable = false)
     String type;
@@ -49,8 +53,41 @@ public class Promotion {
     @Column(name = "promotion_status")
     Boolean status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
+
+    public PromotionResponse toResponse() {
+        return PromotionResponse.builder()
+                .id(this.id)
+                .type(this.type)
+                .discount(this.discount)
+                .promoCode(this.promoCode)
+                .maxDiscount(this.maxDiscount)
+                .startDate(this.startDate)
+                .endDate(this.endDate)
+                .usageLimit(this.usageLimit)
+                .usageCount(this.usageCount)
+                .applicableCustomer(this.applicableCustomer)
+                .status(this.status)
+                .product(this.product != null ? this.product.toResponseOnlyProduct() : null) // Map the associated product
+                .build();
+    }
+    public PromotionResponse toResponseWithoutProduct() {
+        return PromotionResponse.builder()
+                .id(this.id)
+                .type(this.type)
+                .discount(this.discount)
+                .promoCode(this.promoCode)
+                .maxDiscount(this.maxDiscount)
+                .startDate(this.startDate)
+                .endDate(this.endDate)
+                .usageLimit(this.usageLimit)
+                .usageCount(this.usageCount)
+                .applicableCustomer(this.applicableCustomer)
+                .status(this.status)
+                .build();
+    }
+
 
 }

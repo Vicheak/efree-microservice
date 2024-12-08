@@ -1,34 +1,38 @@
 package com.efree.product.api.entity;
 
+import com.efree.product.api.dto.response.ProductImageResponse;
+import com.efree.product.api.dto.response.ProductResponse;
+import com.efree.product.api.dto.response.PromotionResponse;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "products")
 public class Product {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "product_id")
-    String id;
+    UUID id;
 
     @Column(name = "category_id", nullable = false)
-    Long categoryId;
-
-    @Column(name = "seller_id")
-    String sellerId;
-
+    String categoryId;
+    @Column(name = "user_id", nullable = false)
+    String userId;
     @Column(name = "product_name", nullable = false)
     String name;
 
@@ -74,9 +78,6 @@ public class Product {
     @Column(name = "product_is_new_arrival")
     Boolean isNewArrival;
 
-    @Column(name = "product_is_best_seller")
-    Boolean isBestSeller;
-
     @Column(name = "product_shipping_class", length = 100)
     String shippingClass;
 
@@ -112,10 +113,105 @@ public class Product {
     @Column(nullable = false)
     LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_id")
     List<ProductImage> productImages;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product",fetch = FetchType.EAGER)
     List<Promotion> promotions;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Rate> rates = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "products")
+    List<Favorite> favorites = new ArrayList<>();
+
+
+    public ProductResponse toResponse() {
+        List<ProductImageResponse> imageResponse = new ArrayList<>();
+        List<PromotionResponse> promotionResponses = new ArrayList<>();
+        if (productImages != null && !productImages.isEmpty()) {
+            for (ProductImage image : productImages) {
+                imageResponse.add(image.toResponse());
+            }
+        } else {
+            imageResponse = null;
+        }
+        if (promotions != null && !promotions.isEmpty()) {
+            for (Promotion promotion : promotions) {
+                promotionResponses.add(promotion.toResponseWithoutProduct()); // Calls the adjusted method
+            }
+        } else {
+            promotionResponses = null;
+        }
+        return ProductResponse.builder()
+                .productId(this.id)
+                .categoryId(this.categoryId)
+                .userId(this.userId)
+                .name(this.name)
+                .description(this.description)
+                .price(this.price)
+                .stockQty(this.stockQty)
+                .averageRating(this.averageRating)
+                .totalReview(this.totalReview)
+                .status(this.status)
+                .weightType(this.weightType)
+                .weight(this.weight)
+                .dimension(this.dimension)
+                .totalSale(this.totalSale)
+                .brand(this.brand)
+                .warrantyPeriod(this.warrantyPeriod)
+                .isFeatured(this.isFeatured)
+                .isNewArrival(this.isNewArrival)
+                .shippingClass(this.shippingClass)
+                .shippingFee(this.shippingFee)
+                .returnPolicy(this.returnPolicy)
+                .handlingTime(this.handlingTime)
+                .metaTitle(this.metaTitle)
+                .metaDescription(this.metaDescription)
+                .tags(this.tags)
+                .isSecondHand(this.isSecondHand)
+                .secondHandDescription(this.secondHandDescription)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .productImages(imageResponse)
+                .promotions(promotionResponses)
+                .build();
+    }
+    public ProductResponse toResponseOnlyProduct() {
+
+        return ProductResponse.builder()
+                .productId(this.id)
+                .categoryId(this.categoryId)
+                .userId(this.userId)
+                .name(this.name)
+                .description(this.description)
+                .price(this.price)
+                .stockQty(this.stockQty)
+                .averageRating(this.averageRating)
+                .totalReview(this.totalReview)
+                .status(this.status)
+                .weightType(this.weightType)
+                .weight(this.weight)
+                .dimension(this.dimension)
+                .totalSale(this.totalSale)
+                .brand(this.brand)
+                .warrantyPeriod(this.warrantyPeriod)
+                .isFeatured(this.isFeatured)
+                .isNewArrival(this.isNewArrival)
+                .shippingClass(this.shippingClass)
+                .shippingFee(this.shippingFee)
+                .returnPolicy(this.returnPolicy)
+                .handlingTime(this.handlingTime)
+                .metaTitle(this.metaTitle)
+                .metaDescription(this.metaDescription)
+                .tags(this.tags)
+                .isSecondHand(this.isSecondHand)
+                .secondHandDescription(this.secondHandDescription)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .build();
+    }
+
+
 
 }
