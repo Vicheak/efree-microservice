@@ -32,8 +32,18 @@ spring:
       hibernate:
         format_sql: true
 
+  servlet:
+    multipart:
+      max-request-size: 15MB
+      max-file-size: 15MB
+
   config:
     import: optional:configserver:http://localhost:8888/
+
+file:
+  supported-extension: jpg,png,jpeg,webp,gif
+  base-uri: ${FILE_BASE_URI}
+  download-uri: ${FILE_DOWNLOAD_URI}
 
 eureka:
   instance:
@@ -56,3 +66,7 @@ management:
   info:
     env:
       enabled: true
+
+rest:
+  file-service:
+    base-url: ${FILE_SERVICE_BASE_URL}

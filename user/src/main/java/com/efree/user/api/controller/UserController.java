@@ -6,11 +6,14 @@ import com.efree.user.api.dto.request.TransactionUserDto;
 import com.efree.user.api.dto.response.AuthProfileUserDto;
 import com.efree.user.api.dto.response.AuthUserDto;
 import com.efree.user.api.dto.response.UserDto;
+import com.efree.user.api.external.fileservice.dto.FileDto;
 import com.efree.user.api.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -109,6 +112,23 @@ public class UserController {
                 .message("A user status has been updated successfully!")
                 .timestamp(LocalDateTime.now())
                 .payload("No response payload")
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(value = "/upload/profile/{uuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public BaseApi<?> uploadUserProfile(@RequestHeader("XUUID") String authUserUuid,
+                                        @PathVariable String uuid,
+                                        @RequestPart MultipartFile file) {
+
+        FileDto fileDto = userService.uploadUserProfile(authUserUuid, uuid, file);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.NO_CONTENT.value())
+                .message("User profile image has been uploaded successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(fileDto)
                 .build();
     }
 

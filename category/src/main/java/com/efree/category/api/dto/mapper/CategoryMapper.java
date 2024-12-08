@@ -3,23 +3,31 @@ package com.efree.category.api.dto.mapper;
 import com.efree.category.api.dto.request.CategoryRequestDto;
 import com.efree.category.api.dto.response.CategoryResponseDto;
 import com.efree.category.api.entity.Category;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import com.efree.category.api.util.ValueInjectUtil;
+import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface CategoryMapper {
+public abstract class CategoryMapper {
 
-    CategoryResponseDto mapFromCategoryToCategoryResponseDto(Category category);
+    protected ValueInjectUtil valueInjectUtil;
 
-    List<CategoryResponseDto> mapFromCategoryToCategoryResponseDto(List<Category> categories);
+    @Autowired
+    public void setValueInjectUtil(ValueInjectUtil valueInjectUtil) {
+        this.valueInjectUtil = valueInjectUtil;
+    }
 
-    Category mapFromCategoryRequestDtoToCategory(CategoryRequestDto categoryRequestDto);
+    @Mapping(target = "imageUrl", expression = "java(valueInjectUtil.getImageUri(category.getImageUrl()))")
+    @Mapping(target = "downloadUrl", expression = "java(valueInjectUtil.getDownloadUri(category.getImageUrl()))")
+    public abstract CategoryResponseDto mapFromCategoryToCategoryResponseDto(Category category);
+
+    public abstract List<CategoryResponseDto> mapFromCategoryToCategoryResponseDto(List<Category> categories);
+
+    public abstract Category mapFromCategoryRequestDtoToCategory(CategoryRequestDto categoryRequestDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void mapFromCategoryRequestDtoToCategory(@MappingTarget Category category, CategoryRequestDto categoryRequestDto);
+    public abstract void mapFromCategoryRequestDtoToCategory(@MappingTarget Category category, CategoryRequestDto categoryRequestDto);
 
 }

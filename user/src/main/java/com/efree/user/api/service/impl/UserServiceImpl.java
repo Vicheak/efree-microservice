@@ -8,6 +8,8 @@ import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.entity.Role;
 import com.efree.user.api.entity.User;
 import com.efree.user.api.entity.UserRole;
+import com.efree.user.api.external.fileservice.FileServiceRestClientConsumer;
+import com.efree.user.api.external.fileservice.dto.FileDto;
 import com.efree.user.api.repository.RoleRepository;
 import com.efree.user.api.repository.UserRepository;
 import com.efree.user.api.repository.UserRoleRepository;
@@ -20,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -33,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final FileServiceRestClientConsumer fileServiceRestClientConsumer;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -187,6 +191,65 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public FileDto uploadUserProfile(String authUserUuid, String uuid, MultipartFile fileRequest) {
+        //decode auth user uuid
+        authUserUuid = decodeAuthUuid(authUserUuid);
+        User authUser = userRepository.findById(authUserUuid)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                                "Resource denied request to upload!")
+                );
+
+        User user = userRepository.findById(uuid)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "User with uuid, %s has not been found in the system!"
+                                        .formatted(uuid))
+                );
+
+        List<String> authRoles = authUser.getUserRoles().stream()
+                .map(userRole -> userRole.getRole().getName())
+                .toList();
+        if (!authRoles.contains("ADMIN") && !user.getUuid().equals(authUserUuid)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Resource denied request to upload! forbidden!");
+        }
+
+        //invoke file service to upload to server
+        FileDto fileDto = fileServiceRestClientConsumer.singleUpload(fileRequest);
+        user.setImageUrl(fileDto.name());
+        userRepository.save(user);
+
+        return fileDto;
+    }
+
+    @Override
+    public void loadUserPermission(String uuid) {
+
+    }
+
+    @Override
+    public void setUserPermission(String uuid, String permissions) {
+
+    }
+
+    @Override
+    public void removeUserPermission(String uuid, String permissions) {
+
+    }
+
+    private String decodeAuthUuid(String authUserUuid) {
+        try {
+            byte[] decodedBytes = Base64.getDecoder().decode(authUserUuid);
+            authUserUuid = new String(decodedBytes);
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "Error decoding request auth!");
+        }
+        return authUserUuid;
+    }
+
+    @Override
     public AuthProfileUserDto loadUserProfile(String email) {
         //load authenticated user object
         User authenticatedUser = userRepository.findByEmail(email)
@@ -217,7 +280,7 @@ public class UserServiceImpl implements UserService {
         return authUserDto;
     }
 
-    private List<String> buildGrantedAuthorities(User authUser){
+    private List<String> buildGrantedAuthorities(User authUser) {
         List<String> authorities = new ArrayList<>();
         authUser.getUserRoles().forEach(userRole -> {
             authorities.add("ROLE_" + userRole.getRole().getName());

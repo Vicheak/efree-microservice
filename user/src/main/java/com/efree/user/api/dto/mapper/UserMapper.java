@@ -5,24 +5,37 @@ import com.efree.user.api.dto.response.AuthProfileUserDto;
 import com.efree.user.api.dto.response.AuthUserDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.entity.User;
+import com.efree.user.api.util.ValueInjectUtil;
 import org.mapstruct.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface UserMapper {
+public abstract class UserMapper {
 
-    UserDto fromUserToUserDto(User user);
+    protected ValueInjectUtil valueInjectUtil;
 
-    List<UserDto> fromUserToUserDto(List<User> users);
+    @Autowired
+    public void setValueInjectUtil(ValueInjectUtil valueInjectUtil) {
+        this.valueInjectUtil = valueInjectUtil;
+    }
 
-    User fromTransactionUserDtoToUser(TransactionUserDto transactionUserDto);
+    @Mapping(target = "imageUrl", expression = "java(valueInjectUtil.getImageUri(user.getImageUrl()))")
+    @Mapping(target = "downloadUrl", expression = "java(valueInjectUtil.getDownloadUri(user.getImageUrl()))")
+    public abstract UserDto fromUserToUserDto(User user);
+
+    public abstract List<UserDto> fromUserToUserDto(List<User> users);
+
+    public abstract User fromTransactionUserDtoToUser(TransactionUserDto transactionUserDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void fromTransactionUserDtoToUser(@MappingTarget User user, TransactionUserDto transactionUserDto);
+    public abstract void fromTransactionUserDtoToUser(@MappingTarget User user, TransactionUserDto transactionUserDto);
 
-    AuthUserDto fromUserToAuthUserDto(User user);
+    public abstract AuthUserDto fromUserToAuthUserDto(User user);
 
-    AuthProfileUserDto fromUserToAuthProfileUserDto(User user);
+    @Mapping(target = "imageUrl", expression = "java(valueInjectUtil.getImageUri(user.getImageUrl()))")
+    @Mapping(target = "downloadUrl", expression = "java(valueInjectUtil.getDownloadUri(user.getImageUrl()))")
+    public abstract AuthProfileUserDto fromUserToAuthProfileUserDto(User user);
 
 }

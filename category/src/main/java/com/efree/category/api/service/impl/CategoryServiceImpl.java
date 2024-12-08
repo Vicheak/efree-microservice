@@ -3,6 +3,8 @@ package com.efree.category.api.service.impl;
 import com.efree.category.api.dto.mapper.CategoryMapper;
 import com.efree.category.api.dto.request.CategoryRequestDto;
 import com.efree.category.api.dto.response.CategoryResponseDto;
+import com.efree.category.api.external.fileservice.FileServiceRestClientConsumer;
+import com.efree.category.api.external.fileservice.dto.FileDto;
 import com.efree.category.api.entity.Category;
 import com.efree.category.api.repository.CategoryRepository;
 import com.efree.category.api.service.CategoryService;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -22,6 +25,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final FileServiceRestClientConsumer fileServiceRestClientConsumer;
 
     @Override
     public List<CategoryResponseDto> loadAllCategories() {
@@ -102,6 +106,24 @@ public class CategoryServiceImpl implements CategoryService {
                 );
 
         categoryRepository.delete(category);
+    }
+
+    @Override
+    public FileDto uploadCategoryImage(String uuid, MultipartFile fileRequest) {
+        //check if the category does not exist
+        Category category = categoryRepository.findById(uuid)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Category with id, %s has not been found in the system!"
+                                        .formatted(uuid))
+                );
+
+        //invoke file service to upload to server
+        FileDto fileDto = fileServiceRestClientConsumer.singleUpload(fileRequest);
+        category.setImageUrl(fileDto.name());
+        categoryRepository.save(category);
+
+        return fileDto;
     }
 
 }

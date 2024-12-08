@@ -3,7 +3,7 @@ package com.efree.gateway.api.auth;
 import com.efree.gateway.dto.request.LoginDto;
 import com.efree.gateway.dto.request.RefreshTokenDto;
 import com.efree.gateway.dto.response.AuthDto;
-import com.efree.gateway.dto.response.AuthProfileUserDto;
+import com.efree.gateway.external.userservice.dto.AuthProfileUserDto;
 import com.efree.gateway.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

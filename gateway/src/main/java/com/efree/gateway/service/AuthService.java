@@ -3,7 +3,7 @@ package com.efree.gateway.service;
 import com.efree.gateway.dto.request.LoginDto;
 import com.efree.gateway.dto.request.RefreshTokenDto;
 import com.efree.gateway.dto.response.AuthDto;
-import com.efree.gateway.dto.response.AuthProfileUserDto;
+import com.efree.gateway.external.userservice.dto.AuthProfileUserDto;
 import reactor.core.publisher.Mono;
 
 public interface AuthService {
