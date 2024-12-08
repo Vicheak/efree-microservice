@@ -23,6 +23,7 @@ public abstract class UserMapper {
 
     @Mapping(target = "imageUrl", expression = "java(valueInjectUtil.getImageUri(user.getImageUrl()))")
     @Mapping(target = "downloadUrl", expression = "java(valueInjectUtil.getDownloadUri(user.getImageUrl()))")
+    @Mapping(target = "authorities", expression = "java(valueInjectUtil.buildAuthorityResponse(user.getUserAuthorities()))")
     public abstract UserDto fromUserToUserDto(User user);
 
     public abstract List<UserDto> fromUserToUserDto(List<User> users);

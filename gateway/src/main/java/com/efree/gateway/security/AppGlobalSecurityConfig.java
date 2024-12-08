@@ -73,6 +73,7 @@ public class AppGlobalSecurityConfig {
             //USER SERVICE
             exchange.pathMatchers("/gateway/api/v1/auth/profile/me").hasAuthority("SCOPE_user:profile");
             exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/api/v1/users/upload/profile/**", "/gateway/user/api/v1/users/upload/profile/**", "/user-service/api/v1/users/upload/profile/**").hasAuthority("SCOPE_user:profile");
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/api/v1/authorities/**", "/gateway/user/api/v1/authorities/**", "/user-service/api/v1/authorities/**").hasAuthority("SCOPE_ROLE_ADMIN");
             exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:read");
             exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:write");
             exchange.pathMatchers(HttpMethod.PUT, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:update");

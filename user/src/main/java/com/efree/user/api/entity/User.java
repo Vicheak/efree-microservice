@@ -64,6 +64,6 @@ public class User {
     String imageUrl;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
-    List<UserRole> userRoles;
+    List<UserAuthority> userAuthorities;
 
 }

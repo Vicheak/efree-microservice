@@ -21,5 +21,5 @@ public record UserDto(String uuid,
                       String imageUrl,
                       @JsonInclude(JsonInclude.Include.NON_NULL)
                       String downloadUrl,
-                      List<UserRoleDto> userRoles) {
+                      List<String> authorities) {
 }

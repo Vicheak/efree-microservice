@@ -1,21 +1,25 @@
 package com.efree.user.api.service.impl;
 
+import com.efree.user.api.dto.mapper.AuthorityMapper;
 import com.efree.user.api.dto.mapper.UserMapper;
+import com.efree.user.api.dto.request.PermissionRequestDto;
 import com.efree.user.api.dto.request.TransactionUserDto;
 import com.efree.user.api.dto.response.AuthProfileUserDto;
 import com.efree.user.api.dto.response.AuthUserDto;
+import com.efree.user.api.dto.response.AuthorityResponseDto;
 import com.efree.user.api.dto.response.UserDto;
+import com.efree.user.api.entity.Authority;
 import com.efree.user.api.entity.Role;
 import com.efree.user.api.entity.User;
-import com.efree.user.api.entity.UserRole;
+import com.efree.user.api.entity.UserAuthority;
 import com.efree.user.api.external.fileservice.FileServiceRestClientConsumer;
 import com.efree.user.api.external.fileservice.dto.FileDto;
+import com.efree.user.api.repository.AuthorityRepository;
 import com.efree.user.api.repository.RoleRepository;
+import com.efree.user.api.repository.UserAuthorityRepository;
 import com.efree.user.api.repository.UserRepository;
-import com.efree.user.api.repository.UserRoleRepository;
 import com.efree.user.api.service.UserService;
 import com.efree.user.api.util.FormatUtil;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +39,10 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final AuthorityRepository authorityRepository;
+    private final AuthorityMapper authorityMapper;
     private final RoleRepository roleRepository;
-    private final UserRoleRepository userRoleRepository;
+    private final UserAuthorityRepository userAuthorityRepository;
     private final FileServiceRestClientConsumer fileServiceRestClientConsumer;
     private final PasswordEncoder passwordEncoder;
 
@@ -79,20 +86,43 @@ public class UserServiceImpl implements UserService {
         user.setIsVerified(true);
         user.setIsEnabled(true);
 
-        List<UserRole> userRoles = new ArrayList<>();
+        List<UserAuthority> userAuthorities = new ArrayList<>();
+        Set<Authority> requestAuthorities = new HashSet<>();
 
-        transactionUserDto.roleIds().forEach(roleId ->
-                userRoles.add(UserRole.builder()
-                        .user(user)
-                        .role(Role.builder().id(roleId).build())
-                        .build()));
+        transactionUserDto.roleIds().forEach(roleId -> {
+            Optional<Role> requestRoleOptional = roleRepository.findById(roleId);
+            if (requestRoleOptional.isPresent()) {
+                Role requestRole = requestRoleOptional.get();
+                requestAuthorities.addAll(requestRole.getAuthorities());
+            }
+        });
 
-        //set up user roles
-        user.setUserRoles(userRoles);
+        /**
+         * 1. ROLE_ADMIN -> MAP TO AUTHORITY 34
+         * 2. ROLE_CUSTOMER -> MAP TO AUTHORITY 35
+         */
+
+        if (transactionUserDto.roleIds().stream().anyMatch(roleId -> roleId == 1)) {
+            requestAuthorities.add(Authority.builder()
+                    .id(34)
+                    .build());
+        } else {
+            requestAuthorities.add(Authority.builder()
+                    .id(35)
+                    .build());
+        }
+
+        requestAuthorities.forEach(authority -> userAuthorities.add(UserAuthority.builder()
+                .user(user)
+                .authority(authority)
+                .build()));
+
+        //set up user authorities
+        user.setUserAuthorities(userAuthorities);
 
         userRepository.save(user);
 
-        userRoleRepository.saveAll(userRoles);
+        userAuthorityRepository.saveAll(userAuthorities);
     }
 
     @Transactional
@@ -132,29 +162,12 @@ public class UserServiceImpl implements UserService {
                         "Phone Number conflicts resource in the system!");
         }
 
-        //check roles if exist
-        if (Objects.nonNull(transactionUserDto.roleIds()))
-            if (transactionUserDto.roleIds().isEmpty())
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "User must have at least one role!");
-            else {
-                boolean allExisted = transactionUserDto.roleIds().stream()
-                        .allMatch(roleRepository::existsById);
-
-                if (!allExisted)
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Role is not valid in the system! please check!");
-
-                //process to remove previous user roles
-                userRoleRepository.deleteAll(user.getUserRoles());
-
-                List<UserRole> userRoles = updateUserRolesTransaction(user, transactionUserDto.roleIds());
-
-                userRoleRepository.saveAll(userRoles);
-            }
-
         //map from dto to entity but except the null value from dto
         userMapper.fromTransactionUserDtoToUser(user, transactionUserDto);
+
+        if (Objects.nonNull(transactionUserDto.password()) && !transactionUserDto.password().isEmpty()) {
+            user.setEncryptedPassword(passwordEncoder.encode(transactionUserDto.password()));
+        }
 
         userRepository.save(user);
     }
@@ -169,8 +182,8 @@ public class UserServiceImpl implements UserService {
                                         .formatted(uuid))
                 );
 
-        //remove from user roles
-        userRoleRepository.deleteAll(user.getUserRoles());
+        //remove from user authorities
+        userAuthorityRepository.deleteAll(user.getUserAuthorities());
 
         userRepository.delete(user);
     }
@@ -190,6 +203,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     @Override
     public FileDto uploadUserProfile(String authUserUuid, String uuid, MultipartFile fileRequest) {
         //decode auth user uuid
@@ -207,10 +221,10 @@ public class UserServiceImpl implements UserService {
                                         .formatted(uuid))
                 );
 
-        List<String> authRoles = authUser.getUserRoles().stream()
-                .map(userRole -> userRole.getRole().getName())
+        List<String> authAuthorities = authUser.getUserAuthorities().stream()
+                .map(userAuthority -> userAuthority.getAuthority().getName())
                 .toList();
-        if (!authRoles.contains("ADMIN") && !user.getUuid().equals(authUserUuid)) {
+        if (!authAuthorities.contains("ADMIN") && !user.getUuid().equals(authUserUuid)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Resource denied request to upload! forbidden!");
         }
@@ -224,18 +238,136 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void loadUserPermission(String uuid) {
+    public List<AuthorityResponseDto> loadUserPermission(String uuid) {
+        User user = userRepository.findById(uuid)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "User with uuid, %s has not been found in the system!"
+                                        .formatted(uuid))
+                );
 
+        List<Authority> authorities = new ArrayList<>();
+        user.getUserAuthorities().forEach(userAuthority -> authorities.add(userAuthority.getAuthority()));
+        return authorityMapper.fromAuthorityToAuthorityResponseDto(authorities);
     }
 
+    @Transactional
     @Override
-    public void setUserPermission(String uuid, String permissions) {
+    public List<AuthorityResponseDto> setUserPermission(String uuid, PermissionRequestDto permissionRequestDto) {
+        User user = userRepository.findById(uuid)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "User with uuid, %s has not been found in the system!"
+                                        .formatted(uuid))
+                );
 
+        //build request authorities
+        Set<Authority> requestAuthorities = buildRequestAuthoritiesWithPermission(permissionRequestDto.permission());
+
+        //check existing user authorities
+        List<Authority> authorities = new ArrayList<>(user.getUserAuthorities().stream()
+                .map(UserAuthority::getAuthority)
+                .toList());
+
+        Set<Authority> missingAuthorities = requestAuthorities.stream()
+                .filter(requestAuthority -> {
+                    boolean isExisted = authorityRepository.existsByIdAndName(requestAuthority.getId(), requestAuthority.getName());
+                    if (!isExisted) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "Invalid request authorities!");
+                    }
+                    return authorities.stream()
+                            .noneMatch(existingAuthority ->
+                                    existingAuthority.getId() == requestAuthority.getId() &&
+                                            existingAuthority.getName().equals(requestAuthority.getName()));
+                })
+                .collect(Collectors.toSet());
+        authorities.addAll(missingAuthorities);
+
+        //set up user authorities
+        List<UserAuthority> userAuthorities = user.getUserAuthorities();
+        missingAuthorities.forEach(authority -> userAuthorities.add(UserAuthority.builder()
+                .user(user)
+                .authority(Authority.builder()
+                        .id(authority.getId())
+                        .build())
+                .build()));
+        user.setUserAuthorities(userAuthorities);
+        userAuthorityRepository.saveAll(userAuthorities);
+        userAuthorityRepository.flush();
+        return authorityMapper.fromAuthorityToAuthorityResponseDto(authorities);
     }
 
+    @Transactional
     @Override
-    public void removeUserPermission(String uuid, String permissions) {
+    public List<AuthorityResponseDto> removeUserPermission(String uuid, PermissionRequestDto permissionRequestDto) {
+        User user = userRepository.findById(uuid)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "User with uuid, %s has not been found in the system!"
+                                        .formatted(uuid))
+                );
 
+        //build request authorities
+        Set<Authority> requestAuthorities = buildRequestAuthoritiesWithPermission(permissionRequestDto.permission());
+
+        //check existing user authorities
+        List<Authority> authorities = new ArrayList<>(user.getUserAuthorities().stream()
+                .map(UserAuthority::getAuthority)
+                .toList());
+
+        requestAuthorities.forEach(requestAuthority -> {
+                    boolean isExisted = authorityRepository.existsByIdAndName(requestAuthority.getId(), requestAuthority.getName());
+                    if (!isExisted) {
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                                "Invalid request authorities!");
+                    }
+                });
+
+        Set<Authority> authoritiesToRemove = authorities.stream()
+                .filter(existingAuthority -> requestAuthorities.stream()
+                        .anyMatch(requestAuthority ->
+                                requestAuthority.getId() == existingAuthority.getId() &&
+                                        requestAuthority.getName().equals(existingAuthority.getName())))
+                .collect(Collectors.toSet());
+        authorities.removeAll(authoritiesToRemove);
+
+        //remove all user authorities for set up new
+        userAuthorityRepository.deleteAll(user.getUserAuthorities());
+        userAuthorityRepository.flush();
+
+        //set up user authorities
+        List<UserAuthority> userAuthorities = new ArrayList<>();
+        authorities.forEach(authority -> userAuthorities.add(UserAuthority.builder()
+                .user(user)
+                .authority(Authority.builder()
+                        .id(authority.getId())
+                        .build())
+                .build()));
+        user.setUserAuthorities(userAuthorities);
+        userAuthorityRepository.saveAll(userAuthorities);
+        userAuthorityRepository.flush();
+        return authorityMapper.fromAuthorityToAuthorityResponseDto(authorities);
+    }
+
+    private Set<Authority> buildRequestAuthoritiesWithPermission(String permission) {
+        Set<Authority> requestAuthorities = new HashSet<>();
+        try {
+            String[] requestPermissions = permission.split(",");
+            Arrays.stream(requestPermissions).forEach(requestPermission -> {
+                String[] concatAuthority = requestPermission.split("\\^");
+                int authorityId = Integer.parseInt(concatAuthority[0]);
+                String authorityName = concatAuthority[1];
+                requestAuthorities.add(Authority.builder()
+                        .id(authorityId)
+                        .name(authorityName)
+                        .build());
+            });
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Failed to request authorities!");
+        }
+        return requestAuthorities;
     }
 
     private String decodeAuthUuid(String authUserUuid) {
@@ -282,27 +414,10 @@ public class UserServiceImpl implements UserService {
 
     private List<String> buildGrantedAuthorities(User authUser) {
         List<String> authorities = new ArrayList<>();
-        authUser.getUserRoles().forEach(userRole -> {
-            authorities.add("ROLE_" + userRole.getRole().getName());
-            userRole.getRole().getAuthorities().forEach(authority ->
-                    authorities.add(authority.getName()));
+        authUser.getUserAuthorities().forEach(userAuthority -> {
+            authorities.add(userAuthority.getAuthority().getName());
         });
         return authorities;
-    }
-
-    private @NonNull List<UserRole> updateUserRolesTransaction(@NonNull User user, @NonNull Set<Integer> roleIds) {
-        List<UserRole> userRoles = new ArrayList<>();
-
-        roleIds.forEach(roleId ->
-                userRoles.add(UserRole.builder()
-                        .user(user)
-                        .role(Role.builder().id(roleId).build())
-                        .build()));
-
-        //set up new user roles
-        user.setUserRoles(userRoles);
-
-        return userRoles;
     }
 
     public void validateTransactionUserDto(TransactionUserDto transactionUserDto) {

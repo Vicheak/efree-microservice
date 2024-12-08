@@ -2,9 +2,11 @@ package com.efree.user.api.controller;
 
 import com.efree.user.api.base.BaseApi;
 import com.efree.user.api.dto.request.IsEnabledDto;
+import com.efree.user.api.dto.request.PermissionRequestDto;
 import com.efree.user.api.dto.request.TransactionUserDto;
 import com.efree.user.api.dto.response.AuthProfileUserDto;
 import com.efree.user.api.dto.response.AuthUserDto;
+import com.efree.user.api.dto.response.AuthorityResponseDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.external.fileservice.dto.FileDto;
 import com.efree.user.api.service.UserService;
@@ -132,6 +134,53 @@ public class UserController {
                 .build();
     }
 
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/authorities/{uuid}")
+    public BaseApi<?> loadUserPermission(@PathVariable String uuid) {
+
+        List<AuthorityResponseDto> authorityResponses = userService.loadUserPermission(uuid);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.NO_CONTENT.value())
+                .message("User permission loaded successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(authorityResponses)
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/authorities/{uuid}")
+    public BaseApi<?> setUserPermission(@PathVariable String uuid,
+                                        @RequestBody @Valid PermissionRequestDto permissionRequestDto) {
+
+        List<AuthorityResponseDto> authorityResponses = userService.setUserPermission(uuid, permissionRequestDto);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.NO_CONTENT.value())
+                .message("User permission updated successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(authorityResponses)
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/authorities/{uuid}")
+    public BaseApi<?> removeUserPermission(@PathVariable String uuid,
+                                           @RequestBody @Valid PermissionRequestDto permissionRequestDto) {
+
+        List<AuthorityResponseDto> authorityResponses = userService.removeUserPermission(uuid, permissionRequestDto);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.NO_CONTENT.value())
+                .message("User permission updated successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(authorityResponses)
+                .build();
+    }
+
     //FOR CALL INTERNAL SERVICE
     @GetMapping("/me/{email}")
     public AuthProfileUserDto loadUserProfile(@PathVariable String email) {
@@ -141,7 +190,7 @@ public class UserController {
     //FOR CALL INTERNAL SERVICE
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/authUser/{email}")
-    public AuthUserDto loadAuthUserByEmail(@PathVariable String email){
+    public AuthUserDto loadAuthUserByEmail(@PathVariable String email) {
         return userService.loadAuthUserByEmail(email);
     }
 

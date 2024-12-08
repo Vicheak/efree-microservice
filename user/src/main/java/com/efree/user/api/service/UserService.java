@@ -1,8 +1,10 @@
 package com.efree.user.api.service;
 
+import com.efree.user.api.dto.request.PermissionRequestDto;
 import com.efree.user.api.dto.request.TransactionUserDto;
 import com.efree.user.api.dto.response.AuthProfileUserDto;
 import com.efree.user.api.dto.response.AuthUserDto;
+import com.efree.user.api.dto.response.AuthorityResponseDto;
 import com.efree.user.api.dto.response.UserDto;
 import com.efree.user.api.external.fileservice.dto.FileDto;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,11 +61,11 @@ public interface UserService {
      */
     FileDto uploadUserProfile(String authUserUuid, String uuid, MultipartFile fileRequest);
 
-    void loadUserPermission(String uuid);
+    List<AuthorityResponseDto> loadUserPermission(String uuid);
 
-    void setUserPermission(String uuid, String permissions);
+    List<AuthorityResponseDto> setUserPermission(String uuid, PermissionRequestDto permissionRequestDto);
 
-    void removeUserPermission(String uuid, String permissions);
+    List<AuthorityResponseDto> removeUserPermission(String uuid, PermissionRequestDto permissionRequestDto);
 
     /**
      * This method is used to load user profile by authenticated user

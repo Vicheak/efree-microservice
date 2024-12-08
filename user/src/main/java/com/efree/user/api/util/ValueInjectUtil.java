@@ -1,8 +1,11 @@
 package com.efree.user.api.util;
 
+import com.efree.user.api.entity.UserAuthority;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Component
@@ -20,6 +23,12 @@ public class ValueInjectUtil {
 
     public String getDownloadUri(String name) {
         return Objects.nonNull(name) ? downloadUri + name : null;
+    }
+
+    public List<String> buildAuthorityResponse(List<UserAuthority> userAuthorities){
+        List<String> authorityResponse = new ArrayList<>();
+        userAuthorities.forEach(userAuthority -> authorityResponse.add(userAuthority.getAuthority().getName()));
+        return authorityResponse;
     }
 
 }
