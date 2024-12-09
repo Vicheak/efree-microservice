@@ -18,7 +18,7 @@ public interface CategoryService {
      * @param id is the path parameter from client
      * @return CategoryResponseDto
      */
-    CategoryResponseDto loadCategoryById(Long id);
+    CategoryResponseDto loadCategoryById(String id);
 
     /**
      * This method is used to create new category resource into the system
@@ -33,12 +33,12 @@ public interface CategoryService {
      * @param categoryRequestDto is the request from client
      * @return CategoryResponseDto
      */
-    CategoryResponseDto updateCategoryById(Long id, CategoryRequestDto categoryRequestDto);
+    CategoryResponseDto updateCategoryById(String id, CategoryRequestDto categoryRequestDto);
 
     /**
      * This method is used to delete specific category resource by name
      * @param id is the path parameter from client
      */
-    void deleteCategoryById(Long id);
+    void deleteCategoryById(String id);
 
 }

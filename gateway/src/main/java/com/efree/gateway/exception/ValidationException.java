@@ -16,7 +16,7 @@ import java.util.List;
 public class ValidationException {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public BaseError<?> handleValidationException(MethodArgumentNotValidException ex) {
         List<FieldError> errors = new ArrayList<>();
 

@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 1729170150663-1
+      id: 1733328228090-1
       author: suonvicheak991@gmail.com (generated)
       changes:
         - createTable:
@@ -66,7 +66,7 @@ databaseChangeLog:
                   type: VARCHAR(255)
             tableName: users
   - changeSet:
-      id: 1729170150663-2
+      id: 1733328228090-2
       author: suonvicheak991@gmail.com (generated)
       changes:
         - createTable:
@@ -86,7 +86,7 @@ databaseChangeLog:
                   type: VARCHAR(120)
             tableName: authorities
   - changeSet:
-      id: 1729170150663-3
+      id: 1733328228090-3
       author: suonvicheak991@gmail.com (generated)
       changes:
         - createTable:
@@ -106,7 +106,7 @@ databaseChangeLog:
                   type: VARCHAR(100)
             tableName: roles
   - changeSet:
-      id: 1729170150663-4
+      id: 1733328228090-4
       author: suonvicheak991@gmail.com (generated)
       changes:
         - createTable:
@@ -137,7 +137,7 @@ databaseChangeLog:
                   type: VARCHAR(255)
             tableName: users_roles
   - changeSet:
-      id: 1729170150663-5
+      id: 1733328228090-5
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addUniqueConstraint:
@@ -145,7 +145,7 @@ databaseChangeLog:
             constraintName: uk33uo7vet9c79ydfuwg1w848f
             tableName: users
   - changeSet:
-      id: 1729170150663-6
+      id: 1733328228090-6
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addUniqueConstraint:
@@ -153,7 +153,7 @@ databaseChangeLog:
             constraintName: ukbcy4eb602iyorjjc2cklf53cf
             tableName: users
   - changeSet:
-      id: 1729170150663-7
+      id: 1733328228090-7
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addUniqueConstraint:
@@ -161,7 +161,7 @@ databaseChangeLog:
             constraintName: ukte75vby8rv7y1qqply0jty8cy
             tableName: users
   - changeSet:
-      id: 1729170150663-8
+      id: 1733328228090-8
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addUniqueConstraint:
@@ -169,7 +169,7 @@ databaseChangeLog:
             constraintName: uk4gictf1bsadhdebtwbanm6d21
             tableName: authorities
   - changeSet:
-      id: 1729170150663-9
+      id: 1733328228090-9
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addUniqueConstraint:
@@ -177,7 +177,7 @@ databaseChangeLog:
             constraintName: uk716hgxp60ym1lifrdgp67xt5k
             tableName: roles
   - changeSet:
-      id: 1729170150663-10
+      id: 1733328228090-10
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addUniqueConstraint:
@@ -185,7 +185,39 @@ databaseChangeLog:
             constraintName: ukq3r1u8cne2rw2hkr899xuh7vj
             tableName: users_roles
   - changeSet:
-      id: 1729170150663-11
+      id: 1733328228090-11
+      author: suonvicheak991@gmail.com (generated)
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: categories_pkey
+                  name: category_id
+                  type: VARCHAR(255)
+              - column:
+                  name: category_description_en
+                  type: VARCHAR(255)
+              - column:
+                  name: category_description_kh
+                  type: VARCHAR(255)
+              - column:
+                  name: category_image_url
+                  type: VARCHAR(255)
+              - column:
+                  name: category_is_active
+                  type: BOOLEAN
+              - column:
+                  name: category_name_en
+                  type: VARCHAR(255)
+              - column:
+                  name: category_name_kh
+                  type: VARCHAR(255)
+            tableName: categories
+  - changeSet:
+      id: 1733328228090-12
       author: suonvicheak991@gmail.com (generated)
       changes:
         - createTable:
@@ -198,7 +230,10 @@ databaseChangeLog:
                   name: image_id
                   type: VARCHAR(255)
               - column:
-                  name: description
+                  name: description_en
+                  type: TEXT
+              - column:
+                  name: description_kh
                   type: TEXT
               - column:
                   constraints:
@@ -206,13 +241,16 @@ databaseChangeLog:
                   name: image_url
                   type: VARCHAR(255)
               - column:
+                  name: is_based
+                  type: BOOLEAN
+              - column:
                   constraints:
                     nullable: false
                   name: product_id
                   type: VARCHAR(255)
             tableName: product_images
   - changeSet:
-      id: 1729170150663-12
+      id: 1733328228090-13
       author: suonvicheak991@gmail.com (generated)
       changes:
         - createTable:
@@ -241,7 +279,10 @@ databaseChangeLog:
                   name: created_at
                   type: TIMESTAMP WITHOUT TIME ZONE
               - column:
-                  name: product_description
+                  name: product_description_en
+                  type: TEXT
+              - column:
+                  name: product_description_kh
                   type: TEXT
               - column:
                   name: product_dimension
@@ -270,7 +311,12 @@ databaseChangeLog:
               - column:
                   constraints:
                     nullable: false
-                  name: product_name
+                  name: product_name_en
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: product_name_kh
                   type: VARCHAR(255)
               - column:
                   constraints:
@@ -282,9 +328,6 @@ databaseChangeLog:
                   type: TEXT
               - column:
                   name: product_second_hand_description
-                  type: VARCHAR(255)
-              - column:
-                  name: seller_id
                   type: VARCHAR(255)
               - column:
                   name: product_shipping_class
@@ -325,7 +368,7 @@ databaseChangeLog:
                   type: VARCHAR(50)
             tableName: products
   - changeSet:
-      id: 1729170150663-13
+      id: 1733328228090-14
       author: suonvicheak991@gmail.com (generated)
       changes:
         - createTable:
@@ -361,7 +404,12 @@ databaseChangeLog:
               - column:
                   constraints:
                     nullable: false
-                  name: promotion_type
+                  name: promotion_type_en
+                  type: VARCHAR(100)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: promotion_type_kh
                   type: VARCHAR(100)
               - column:
                   name: promotion_usage_count
@@ -376,7 +424,7 @@ databaseChangeLog:
                   type: VARCHAR(255)
             tableName: promotions
   - changeSet:
-      id: 1729170150663-14
+      id: 1733328228090-15
       author: suonvicheak991@gmail.com (generated)
       changes:
         - createTable:
@@ -397,7 +445,7 @@ databaseChangeLog:
                   type: INTEGER
             tableName: roles_auths
   - changeSet:
-      id: 1729170150663-15
+      id: 1733328228090-16
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addForeignKeyConstraint:
@@ -412,7 +460,7 @@ databaseChangeLog:
             referencedTableName: users
             validate: true
   - changeSet:
-      id: 1729170150663-16
+      id: 1733328228090-17
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addForeignKeyConstraint:
@@ -427,7 +475,7 @@ databaseChangeLog:
             referencedTableName: authorities
             validate: true
   - changeSet:
-      id: 1729170150663-17
+      id: 1733328228090-18
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addForeignKeyConstraint:
@@ -442,7 +490,7 @@ databaseChangeLog:
             referencedTableName: products
             validate: true
   - changeSet:
-      id: 1729170150663-18
+      id: 1733328228090-19
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addForeignKeyConstraint:
@@ -457,7 +505,7 @@ databaseChangeLog:
             referencedTableName: roles
             validate: true
   - changeSet:
-      id: 1729170150663-19
+      id: 1733328228090-20
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addForeignKeyConstraint:
@@ -472,7 +520,7 @@ databaseChangeLog:
             referencedTableName: roles
             validate: true
   - changeSet:
-      id: 1729170150663-20
+      id: 1733328228090-21
       author: suonvicheak991@gmail.com (generated)
       changes:
         - addForeignKeyConstraint:

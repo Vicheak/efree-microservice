@@ -18,12 +18,19 @@ spring:
   profiles:
     active: dev
 
-    data:
-      mongodb:
-        uri: ${DATABASE_URI}
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
 
   jpa:
     open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
 
   config:
     import: optional:configserver:http://localhost:8888/

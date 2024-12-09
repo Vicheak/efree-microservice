@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +29,11 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryResponseDto loadCategoryById(Long id) {
+    public CategoryResponseDto loadCategoryById(String id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Category with id, %d has not been found in the system!"
+                                "Category with id, %s has not been found in the system!"
                                         .formatted(id))
                 );
 
@@ -43,43 +44,44 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponseDto createNewCategory(CategoryRequestDto categoryRequestDto) {
         //check if category's name already exists
-        if (categoryRepository.existsByNameIsIgnoreCase(categoryRequestDto.name()))
+        if (categoryRepository.existsByNameEnIsIgnoreCase(categoryRequestDto.nameEn()))
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Category's name conflicts resource in the system!");
 
+        if (Objects.nonNull(categoryRequestDto.nameKh()) && !categoryRequestDto.nameKh().isEmpty()) {
+            if (categoryRepository.existsByNameKhIsIgnoreCase(categoryRequestDto.nameKh()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Category's name conflicts resource in the system!");
+        }
+
         //map from dto to entity category
         Category category = categoryMapper.mapFromCategoryRequestDtoToCategory(categoryRequestDto);
-
-        //check if there are categories in the database
-        if (categoryRepository.count() != 0) {
-            Category topCategory = categoryRepository.findFirstByOrderByIdDesc()
-                    .orElseThrow(
-                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                    "Category has not been found in the system!")
-                    );
-
-            //increase the primary key
-            category.setId(topCategory.getId() + 1);
-        } else category.setId(1L);
-
-        return categoryMapper.mapFromCategoryToCategoryResponseDto(categoryRepository.insert(category));
+        category.setId(UUID.randomUUID().toString());
+        categoryRepository.save(category);
+        return categoryMapper.mapFromCategoryToCategoryResponseDto(category);
     }
 
     @Transactional
     @Override
-    public CategoryResponseDto updateCategoryById(Long id, CategoryRequestDto categoryRequestDto) {
+    public CategoryResponseDto updateCategoryById(String id, CategoryRequestDto categoryRequestDto) {
         //check if the category does not exist
         Category category = categoryRepository.findById(id)
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Category with id, %d has not been found in the system!"
+                                "Category with id, %s has not been found in the system!"
                                         .formatted(id))
                 );
 
         //check if category's name already exists (except the previous name)
-        if (Objects.nonNull(categoryRequestDto.name()))
-            if (!categoryRequestDto.name().equalsIgnoreCase(category.getName()) &&
-                    categoryRepository.existsByNameIsIgnoreCase(categoryRequestDto.name()))
+        if (Objects.nonNull(categoryRequestDto.nameEn()) && !categoryRequestDto.nameKh().isEmpty())
+            if (!categoryRequestDto.nameEn().equalsIgnoreCase(category.getNameEn()) &&
+                    categoryRepository.existsByNameEnIsIgnoreCase(categoryRequestDto.nameEn()))
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Category's name conflicts resource in the system!");
+
+        if (Objects.nonNull(categoryRequestDto.nameKh()) && !categoryRequestDto.nameKh().isEmpty())
+            if (!categoryRequestDto.nameKh().equalsIgnoreCase(category.getNameKh()) &&
+                    categoryRepository.existsByNameKhIsIgnoreCase(categoryRequestDto.nameKh()))
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
                         "Category's name conflicts resource in the system!");
 
@@ -90,12 +92,12 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @Override
-    public void deleteCategoryById(Long id) {
+    public void deleteCategoryById(String id) {
         //check if the category does not exist
         Category category = categoryRepository.findById(id)
                 .orElseThrow(
                         () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Category with id, %d has not been found in the system!"
+                                "Category with id, %s has not been found in the system!"
                                         .formatted(id))
                 );
 

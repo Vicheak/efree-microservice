@@ -58,7 +58,8 @@ public class AppGlobalSecurityConfig {
             exchange.pathMatchers(
                     // For external resources
                     "/gateway/api/v1/auth/login",
-                    "/gateway/api/v1/auth/refreshToken").permitAll();
+                    "/gateway/api/v1/auth/refreshToken",
+                    "/gateway/api/v1/auth/ping").permitAll();
 
             exchange.pathMatchers(HttpMethod.POST,
                     "/gateway/USER/api/v1/auth/**",
@@ -66,14 +67,40 @@ public class AppGlobalSecurityConfig {
                     "/user-service/api/v1/auth/**").permitAll();
 
             //ACTUATOR
-            exchange.pathMatchers("/actuator/**").hasAuthority("SCOPE_ROLE_ADMIN");
+            exchange.pathMatchers("/actuator/**").hasAnyAuthority(
+                    "SCOPE_ROLE_ADMIN", "SCOPE_actuator:read", "SCOPE_actuator:post");
 
             //USER SERVICE
+            exchange.pathMatchers("/gateway/api/v1/auth/profile/me").hasAuthority("SCOPE_user:profile");
             exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:read");
             exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:write");
             exchange.pathMatchers(HttpMethod.PUT, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:update");
             exchange.pathMatchers(HttpMethod.PATCH, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:update");
             exchange.pathMatchers(HttpMethod.DELETE, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:delete");
+
+            //CATEGORY SERVICE
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:read");
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:write");
+            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:update");
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:delete");
+
+            //PRODUCT SERVICE
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:read");
+            exchange.pathMatchers(HttpMethod.POST,"/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:write");
+            exchange.pathMatchers(HttpMethod.PUT, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:update");
+            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:update");
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:delete");
+
+            //ORDER SERVICE
+
+            //PAYMENT SERVICE
+
+            //FILE SERVICE
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/file/**", "/gateway/resource/file/**", "/file-service/file/**").permitAll();
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/api/v1/files/download/**", "/gateway/resource/api/v1/files/download/**", "/file-service/api/v1/files/download/**").permitAll();
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/**", "/gateway/resource/**", "/file-service/**").hasAuthority("SCOPE_file:read");
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/RESOURCE/**", "/gateway/resource/**", "/file-service/**").hasAuthority("SCOPE_file:upload");
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/RESOURCE/**", "/gateway/resource/**", "/file-service/**").hasAuthority("SCOPE_file:delete");
 
             exchange.anyExchange().authenticated();
         });
