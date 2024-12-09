@@ -2,12 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/configserver/configserver.iml" filepath="$PROJECT_DIR$/configserver/configserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/efree-microservice.iml" filepath="$PROJECT_DIR$/.idea/efree-microservice.iml" />
-      <module fileurl="file://$PROJECT_DIR$/eurekaserver/eurekaserver.iml" filepath="$PROJECT_DIR$/eurekaserver/eurekaserver.iml" />
-      <module fileurl="file://$PROJECT_DIR$/order/order-service.iml" filepath="$PROJECT_DIR$/order/order-service.iml" />
-      <module fileurl="file://$PROJECT_DIR$/product/product-service.iml" filepath="$PROJECT_DIR$/product/product-service.iml" />
-      <module fileurl="file://$PROJECT_DIR$/user/user-service.iml" filepath="$PROJECT_DIR$/user/user-service.iml" />
     </modules>
   </component>
 </project>
