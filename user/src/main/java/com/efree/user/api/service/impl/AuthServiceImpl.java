@@ -2,14 +2,16 @@ package com.efree.user.api.service.impl;
 
 import com.efree.user.api.dto.mapper.AuthMapper;
 import com.efree.user.api.dto.request.*;
+import com.efree.user.api.entity.Authority;
 import com.efree.user.api.entity.Role;
 import com.efree.user.api.entity.User;
-import com.efree.user.api.entity.UserRole;
+import com.efree.user.api.entity.UserAuthority;
 import com.efree.user.api.external.mail.Mail;
 import com.efree.user.api.external.mail.MailService;
 import com.efree.user.api.repository.AuthRepository;
+import com.efree.user.api.repository.RoleRepository;
 import com.efree.user.api.repository.UserRepository;
-import com.efree.user.api.repository.UserRoleRepository;
+import com.efree.user.api.repository.UserAuthorityRepository;
 import com.efree.user.api.service.AuthService;
 import com.efree.user.api.util.RandomUtil;
 import jakarta.mail.MessagingException;
@@ -21,16 +23,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
-    private final UserRoleRepository userRoleRepository;
+    private final UserAuthorityRepository userAuthorityRepository;
     private final AuthRepository authRepository;
     private final AuthMapper authMapper;
+    private final RoleRepository roleRepository;
     private final UserServiceImpl userService;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
@@ -54,20 +57,32 @@ public class AuthServiceImpl implements AuthService {
         //map from dto to entity
         User newUser = userService.setupNewUser(transactionUserDto);
 
-        //set up the customer role
-        List<UserRole> userRoles = List.of(
-                UserRole.builder()
-                        .user(newUser)
-                        .role(Role.builder().id(2).build())
-                        .build()
-        );
+        List<UserAuthority> userAuthorities = new ArrayList<>();
+        Set<Authority> requestAuthorities = new HashSet<>();
 
-        //set up user roles
-        newUser.setUserRoles(userRoles);
+        //register as customer
+        Optional<Role> requestRoleOptional = roleRepository.findById(2);
+        if (requestRoleOptional.isPresent()) {
+            Role requestRole = requestRoleOptional.get();
+            requestAuthorities.addAll(requestRole.getAuthorities());
+        }
+
+        //for ROLE_CUSTOMER
+        requestAuthorities.add(Authority.builder()
+                .id(35)
+                .build());
+
+        requestAuthorities.forEach(authority -> userAuthorities.add(UserAuthority.builder()
+                .user(newUser)
+                .authority(authority)
+                .build()));
+
+        //set up user authorities
+        newUser.setUserAuthorities(userAuthorities);
 
         authRepository.save(newUser);
 
-        userRoleRepository.saveAll(userRoles);
+        userAuthorityRepository.saveAll(userAuthorities);
 
         updateVerifiedCodeAndSendMail(newUser, subjectMail);
     }

@@ -72,6 +72,8 @@ public class AppGlobalSecurityConfig {
 
             //USER SERVICE
             exchange.pathMatchers("/gateway/api/v1/auth/profile/me").hasAuthority("SCOPE_user:profile");
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/api/v1/users/upload/profile/**", "/gateway/user/api/v1/users/upload/profile/**", "/user-service/api/v1/users/upload/profile/**").hasAuthority("SCOPE_user:profile");
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/api/v1/authorities/**", "/gateway/user/api/v1/authorities/**", "/user-service/api/v1/authorities/**").hasAuthority("SCOPE_ROLE_ADMIN");
             exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:read");
             exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:write");
             exchange.pathMatchers(HttpMethod.PUT, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:update");
@@ -79,7 +81,7 @@ public class AppGlobalSecurityConfig {
             exchange.pathMatchers(HttpMethod.DELETE, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:delete");
 
             //CATEGORY SERVICE
-            exchange.pathMatchers(HttpMethod.GET, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:read");
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").permitAll();
             exchange.pathMatchers(HttpMethod.POST, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:write");
             exchange.pathMatchers(HttpMethod.PATCH, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:update");
             exchange.pathMatchers(HttpMethod.DELETE, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:delete");

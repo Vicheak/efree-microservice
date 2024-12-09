@@ -2,15 +2,20 @@ package com.efree.user.api.controller;
 
 import com.efree.user.api.base.BaseApi;
 import com.efree.user.api.dto.request.IsEnabledDto;
+import com.efree.user.api.dto.request.PermissionRequestDto;
 import com.efree.user.api.dto.request.TransactionUserDto;
 import com.efree.user.api.dto.response.AuthProfileUserDto;
 import com.efree.user.api.dto.response.AuthUserDto;
+import com.efree.user.api.dto.response.AuthorityResponseDto;
 import com.efree.user.api.dto.response.UserDto;
+import com.efree.user.api.external.fileservice.dto.FileDto;
 import com.efree.user.api.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -112,6 +117,70 @@ public class UserController {
                 .build();
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(value = "/upload/profile/{uuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public BaseApi<?> uploadUserProfile(@RequestHeader("XUUID") String authUserUuid,
+                                        @PathVariable String uuid,
+                                        @RequestPart MultipartFile file) {
+
+        FileDto fileDto = userService.uploadUserProfile(authUserUuid, uuid, file);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.NO_CONTENT.value())
+                .message("User profile image has been uploaded successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(fileDto)
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/authorities/{uuid}")
+    public BaseApi<?> loadUserPermission(@PathVariable String uuid) {
+
+        List<AuthorityResponseDto> authorityResponses = userService.loadUserPermission(uuid);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.NO_CONTENT.value())
+                .message("User permission loaded successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(authorityResponses)
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/authorities/{uuid}")
+    public BaseApi<?> setUserPermission(@PathVariable String uuid,
+                                        @RequestBody @Valid PermissionRequestDto permissionRequestDto) {
+
+        List<AuthorityResponseDto> authorityResponses = userService.setUserPermission(uuid, permissionRequestDto);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.NO_CONTENT.value())
+                .message("User permission updated successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(authorityResponses)
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/authorities/{uuid}")
+    public BaseApi<?> removeUserPermission(@PathVariable String uuid,
+                                           @RequestBody @Valid PermissionRequestDto permissionRequestDto) {
+
+        List<AuthorityResponseDto> authorityResponses = userService.removeUserPermission(uuid, permissionRequestDto);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.NO_CONTENT.value())
+                .message("User permission updated successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(authorityResponses)
+                .build();
+    }
+
     //FOR CALL INTERNAL SERVICE
     @GetMapping("/me/{email}")
     public AuthProfileUserDto loadUserProfile(@PathVariable String email) {
@@ -121,7 +190,7 @@ public class UserController {
     //FOR CALL INTERNAL SERVICE
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/authUser/{email}")
-    public AuthUserDto loadAuthUserByEmail(@PathVariable String email){
+    public AuthUserDto loadAuthUserByEmail(@PathVariable String email) {
         return userService.loadAuthUserByEmail(email);
     }
 

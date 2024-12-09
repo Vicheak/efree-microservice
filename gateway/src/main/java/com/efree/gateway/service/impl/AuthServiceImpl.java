@@ -1,14 +1,17 @@
 package com.efree.gateway.service.impl;
 
 import com.efree.gateway.constant.AppGlobalConstant;
-import com.efree.gateway.dto.request.*;
+import com.efree.gateway.dto.request.GenerateTokenDto;
+import com.efree.gateway.dto.request.LoginDto;
+import com.efree.gateway.dto.request.RefreshTokenDto;
 import com.efree.gateway.dto.response.AuthDto;
-import com.efree.gateway.dto.response.AuthProfileUserDto;
+import com.efree.gateway.external.userservice.dto.AuthProfileUserDto;
 import com.efree.gateway.external.userservice.UserServiceWebClient;
 import com.efree.gateway.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +25,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -122,7 +126,8 @@ public class AuthServiceImpl implements AuthService {
                 .cast(JwtAuthenticationToken.class)
                 .map(JwtAuthenticationToken::getToken) //extract JWT object
                 .flatMap(jwt -> userServiceWebClient.loadAuthUserProfile(jwt.getId()))
-                .switchIfEmpty(Mono.error(new IllegalStateException("No authentication found in context")));
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "No authentication found in context")));
     }
 
     private String generateAccessToken(GenerateTokenDto generateTokenDto) {

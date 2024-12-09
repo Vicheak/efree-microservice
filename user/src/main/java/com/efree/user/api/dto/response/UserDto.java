@@ -1,5 +1,7 @@
 package com.efree.user.api.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,5 +17,9 @@ public record UserDto(String uuid,
                       Boolean accountNonExpired,
                       Boolean accountNonLocked,
                       Boolean isEnabled,
-                      List<UserRoleDto> userRoles) {
+                      @JsonInclude(JsonInclude.Include.NON_NULL)
+                      String imageUrl,
+                      @JsonInclude(JsonInclude.Include.NON_NULL)
+                      String downloadUrl,
+                      List<String> authorities) {
 }
