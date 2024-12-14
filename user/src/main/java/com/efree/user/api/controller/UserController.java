@@ -72,10 +72,11 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.OK)
     @PatchMapping("/{uuid}")
-    public BaseApi<?> updateUserByUuid(@PathVariable String uuid,
+    public BaseApi<?> updateUserByUuid(@RequestHeader("XUUID") String authUserUuid,
+                                       @PathVariable String uuid,
                                        @RequestBody TransactionUserDto transactionUserDto) {
 
-        userService.updateUserByUuid(uuid, transactionUserDto);
+        userService.updateUserByUuid(authUserUuid, uuid, transactionUserDto);
 
         return BaseApi.builder()
                 .isSuccess(true)

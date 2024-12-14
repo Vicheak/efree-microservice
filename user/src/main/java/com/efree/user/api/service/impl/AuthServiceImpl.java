@@ -67,11 +67,6 @@ public class AuthServiceImpl implements AuthService {
             requestAuthorities.addAll(requestRole.getAuthorities());
         }
 
-        //for ROLE_CUSTOMER
-        requestAuthorities.add(Authority.builder()
-                .id(35)
-                .build());
-
         requestAuthorities.forEach(authority -> userAuthorities.add(UserAuthority.builder()
                 .user(newUser)
                 .authority(authority)

@@ -18,6 +18,20 @@ spring:
   profiles:
     active: dev
 
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
   servlet:
     multipart:
       max-request-size: 15MB
@@ -27,6 +41,7 @@ spring:
     import: configserver:http://localhost:8888/
 
 file:
+  supported-extension: jpg,png,jpeg,webp,gif
   server-path: ${FILE_SERVER_PATH}
   client-path: /file/**
   base-uri: ${FILE_BASE_URI}

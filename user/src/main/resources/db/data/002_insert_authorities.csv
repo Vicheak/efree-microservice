@@ -30,5 +30,13 @@ authority_id,authority_name
 29,file:delete
 30,file:resource
 31,file:download
-32,actuator:read
-33,actuator:post
+32,banner:read
+33,banner:write
+34,banner:update
+35,banner:delete
+36,content:read
+37,content:post
+38,actuator:read
+39,actuator:post
+40,ROLE_ADMIN
+41,ROLE_CUSTOMER

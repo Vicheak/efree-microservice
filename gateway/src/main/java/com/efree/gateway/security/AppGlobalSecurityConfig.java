@@ -29,6 +29,8 @@ import org.springframework.security.web.server.context.NoOpServerSecurityContext
 
 import java.util.UUID;
 
+import static com.efree.gateway.util.Authority.*;
+
 @Configuration
 @EnableWebFluxSecurity
 @RequiredArgsConstructor
@@ -66,43 +68,52 @@ public class AppGlobalSecurityConfig {
                     "/gateway/user/api/v1/auth/**",
                     "/user-service/api/v1/auth/**").permitAll();
 
+            //MENU DASHBOARD
+            exchange.pathMatchers("/gateway/api/v1/auth/dashboard").authenticated();
+
             //ACTUATOR
             exchange.pathMatchers("/actuator/**").hasAnyAuthority(
-                    "SCOPE_ROLE_ADMIN", "SCOPE_actuator:read", "SCOPE_actuator:post");
+                    ROLE_ADMIN.getAuthority(), ACTUATOR_READ.getAuthority(), ACTUATOR_POST.getAuthority());
 
             //USER SERVICE
-            exchange.pathMatchers("/gateway/api/v1/auth/profile/me").hasAuthority("SCOPE_user:profile");
-            exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/api/v1/users/upload/profile/**", "/gateway/user/api/v1/users/upload/profile/**", "/user-service/api/v1/users/upload/profile/**").hasAuthority("SCOPE_user:profile");
-            exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/api/v1/authorities/**", "/gateway/user/api/v1/authorities/**", "/user-service/api/v1/authorities/**").hasAuthority("SCOPE_ROLE_ADMIN");
-            exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:read");
-            exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:write");
-            exchange.pathMatchers(HttpMethod.PUT, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:update");
-            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:update");
-            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority("SCOPE_user:delete");
+            exchange.pathMatchers("/gateway/api/v1/auth/profile/me").hasAuthority(USER_PROFILE.getAuthority());
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/api/v1/users/upload/profile/**", "/gateway/user/api/v1/users/upload/profile/**", "/user-service/api/v1/users/upload/profile/**").hasAuthority(USER_PROFILE.getAuthority());
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/api/v1/authorities/**", "/gateway/user/api/v1/authorities/**", "/user-service/api/v1/authorities/**").hasAuthority(ROLE_ADMIN.getAuthority());
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority(USER_READ.getAuthority());
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority(USER_WRITE.getAuthority());
+            exchange.pathMatchers(HttpMethod.PUT, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority(USER_UPDATE.getAuthority());
+            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority(USER_UPDATE.getAuthority());
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority(USER_DELETE.getAuthority());
 
             //CATEGORY SERVICE
             exchange.pathMatchers(HttpMethod.GET, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").permitAll();
-            exchange.pathMatchers(HttpMethod.POST, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:write");
-            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:update");
-            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority("SCOPE_category:delete");
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority(CATEGORY_WRITE.getAuthority());
+            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority(CATEGORY_UPDATE.getAuthority());
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority(CATEGORY_DELETE.getAuthority());
 
             //PRODUCT SERVICE
-            exchange.pathMatchers(HttpMethod.GET, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:read");
-            exchange.pathMatchers(HttpMethod.POST,"/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:write");
-            exchange.pathMatchers(HttpMethod.PUT, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:update");
-            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:update");
-            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority("SCOPE_product:delete");
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_READ.getAuthority());
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_WRITE.getAuthority());
+            exchange.pathMatchers(HttpMethod.PUT, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_UPDATE.getAuthority());
+            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_UPDATE.getAuthority());
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_DELETE.getAuthority());
 
             //ORDER SERVICE
 
             //PAYMENT SERVICE
 
             //FILE SERVICE
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/api/v1/banners/**", "/gateway/resource/api/v1/banners/**", "/file-service/api/v1/banners/**").permitAll();
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/RESOURCE/api/v1/banners/**", "/gateway/resource/api/v1/banners/**", "/file-service/api/v1/banners/**").hasAuthority(BANNER_WRITE.getAuthority());
+            exchange.pathMatchers(HttpMethod.PATCH, "/gateway/RESOURCE/api/v1/banners/**", "/gateway/resource/api/v1/banners/**", "/file-service/api/v1/banners/**").hasAuthority(BANNER_UPDATE.getAuthority());
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/RESOURCE/api/v1/banners/**", "/gateway/resource/api/v1/banners/**", "/file-service/api/v1/banners/**").hasAuthority(BANNER_DELETE.getAuthority());
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/api/v1/contents", "/gateway/resource/api/v1/contents", "/file-service/api/v1/contents").permitAll();
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/RESOURCE/api/v1/contents/**", "/gateway/resource/api/v1/contents/**", "/file-service/api/v1/contents/**").hasAuthority(CONTENT_POST.getAuthority());
             exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/file/**", "/gateway/resource/file/**", "/file-service/file/**").permitAll();
             exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/api/v1/files/download/**", "/gateway/resource/api/v1/files/download/**", "/file-service/api/v1/files/download/**").permitAll();
-            exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/**", "/gateway/resource/**", "/file-service/**").hasAuthority("SCOPE_file:read");
-            exchange.pathMatchers(HttpMethod.POST, "/gateway/RESOURCE/**", "/gateway/resource/**", "/file-service/**").hasAuthority("SCOPE_file:upload");
-            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/RESOURCE/**", "/gateway/resource/**", "/file-service/**").hasAuthority("SCOPE_file:delete");
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/api/v1/files/**", "/gateway/resource/api/v1/files/**", "/file-service/api/v1/files/**").hasAuthority(FILE_READ.getAuthority());
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/RESOURCE/api/v1/files/**", "/gateway/resource/api/v1/files/**", "/file-service/api/v1/files/**").hasAuthority(FILE_UPLOAD.getAuthority());
+            exchange.pathMatchers(HttpMethod.DELETE, "/gateway/RESOURCE/api/v1/files/**", "/gateway/resource/api/v1/files/**", "/file-service/api/v1/files/**").hasAuthority(FILE_DELETE.getAuthority());
 
             exchange.anyExchange().authenticated();
         });

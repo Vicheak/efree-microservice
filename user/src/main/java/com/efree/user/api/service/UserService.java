@@ -34,10 +34,11 @@ public interface UserService {
 
     /**
      * This method is used to update specific user by uuid
+     * @param authUserUuid is the request header from auth client
      * @param uuid is the path parameter from client
      * @param transactionUserDto is the request from client
      */
-    void updateUserByUuid(String uuid, TransactionUserDto transactionUserDto);
+    void updateUserByUuid(String authUserUuid, String uuid, TransactionUserDto transactionUserDto);
 
     /**
      * This method is used to delete specific user by uuid from the system

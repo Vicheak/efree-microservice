@@ -108,7 +108,7 @@ public class CategoryController {
 
         return BaseApi.builder()
                 .isSuccess(true)
-                .code(HttpStatus.NO_CONTENT.value())
+                .code(HttpStatus.CREATED.value())
                 .message("A category image has been uploaded successfully!")
                 .timestamp(LocalDateTime.now())
                 .payload(fileDto)

@@ -21,10 +21,10 @@ public class Category {
     @Column(name = "category_id")
     String id;
 
-    @Column(name = "category_name_en")
+    @Column(name = "category_name_en", unique = true, nullable = false)
     String nameEn;
 
-    @Column(name = "category_name_kh")
+    @Column(name = "category_name_kh", unique = true)
     String nameKh;
 
     @Column(name = "category_description_en")
@@ -36,7 +36,7 @@ public class Category {
     @Column(name = "category_image_url")
     String imageUrl;
 
-    @Column(name = "category_is_active")
+    @Column(name = "category_is_active", nullable = false)
     Boolean isActive;
 
 }
