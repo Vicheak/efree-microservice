@@ -11,5 +11,7 @@ public record CategoryResponseDto(String id,
                                   String descriptionKh,
                                   @JsonInclude(JsonInclude.Include.NON_NULL)
                                   String imageUrl,
+                                  @JsonInclude(JsonInclude.Include.NON_NULL)
+                                  String downloadUrl,
                                   Boolean isActive) {
 }

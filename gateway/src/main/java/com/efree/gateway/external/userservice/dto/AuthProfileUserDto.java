@@ -1,5 +1,6 @@
-package com.efree.gateway.dto.response;
+package com.efree.gateway.external.userservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -23,6 +24,10 @@ public class AuthProfileUserDto {
     Boolean accountNonExpired;
     Boolean accountNonLocked;
     Boolean isEnabled;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String imageUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String downloadUrl;
     List<String> grantedAuthorities;
 
 }

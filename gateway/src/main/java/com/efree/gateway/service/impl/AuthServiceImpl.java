@@ -1,14 +1,20 @@
 package com.efree.gateway.service.impl;
 
 import com.efree.gateway.constant.AppGlobalConstant;
-import com.efree.gateway.dto.request.*;
+import com.efree.gateway.dto.request.GenerateTokenDto;
+import com.efree.gateway.dto.request.LoginDto;
+import com.efree.gateway.dto.request.RefreshTokenDto;
 import com.efree.gateway.dto.response.AuthDto;
-import com.efree.gateway.dto.response.AuthProfileUserDto;
+import com.efree.gateway.dto.response.DashboardMenuChildDto;
+import com.efree.gateway.dto.response.DashboardMenuDto;
+import com.efree.gateway.external.userservice.dto.AuthProfileUserDto;
 import com.efree.gateway.external.userservice.UserServiceWebClient;
 import com.efree.gateway.service.AuthService;
+import com.efree.gateway.util.DashboardUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,12 +28,16 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -116,13 +126,56 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public Mono<List<DashboardMenuDto>> loadDashboardMenu() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .cast(JwtAuthenticationToken.class)
+                .map(JwtAuthenticationToken::getAuthorities)
+                .map(authorities -> authorities.stream()
+                        .map(GrantedAuthority::getAuthority) // Extract authority string
+                        .collect(Collectors.toSet()))
+                .flatMap(this::filterDashboardMenuByAuthorities)
+                .map(this::sortDashboardMenuByKey)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "No authentication found in context")));
+    }
+
+    @Override
     public Mono<AuthProfileUserDto> loadUserProfile() {
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
                 .cast(JwtAuthenticationToken.class)
                 .map(JwtAuthenticationToken::getToken) //extract JWT object
                 .flatMap(jwt -> userServiceWebClient.loadAuthUserProfile(jwt.getId()))
-                .switchIfEmpty(Mono.error(new IllegalStateException("No authentication found in context")));
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                        "No authentication found in context")));
+    }
+
+    private Mono<List<DashboardMenuDto>> filterDashboardMenuByAuthorities(Set<String> authorities) {
+        // Filter the menus based on the user's authorities
+        List<DashboardMenuDto> filteredMenus = DashboardUtil.MENU_MAP.values().stream()
+                .map(menu -> {
+                    // Filter children based on authorities
+                    List<DashboardMenuChildDto> filteredChildren = menu.children().stream()
+                            .filter(child -> authorities.contains(child.title()))
+                            .collect(Collectors.toList());
+
+                    // Include the menu only if it has any matching children
+                    if (!filteredChildren.isEmpty()) {
+                        return new DashboardMenuDto(menu.key(), menu.title(), menu.path(), filteredChildren);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull) // Exclude null menus
+                .collect(Collectors.toList());
+
+        return Mono.just(filteredMenus);
+    }
+
+    private List<DashboardMenuDto> sortDashboardMenuByKey(List<DashboardMenuDto> menus) {
+        return menus.stream()
+                .sorted(Comparator.comparing(DashboardMenuDto::key)) // Sort by key
+                .collect(Collectors.toList());
     }
 
     private String generateAccessToken(GenerateTokenDto generateTokenDto) {

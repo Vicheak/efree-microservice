@@ -3,8 +3,11 @@ package com.efree.gateway.service;
 import com.efree.gateway.dto.request.LoginDto;
 import com.efree.gateway.dto.request.RefreshTokenDto;
 import com.efree.gateway.dto.response.AuthDto;
-import com.efree.gateway.dto.response.AuthProfileUserDto;
+import com.efree.gateway.dto.response.DashboardMenuDto;
+import com.efree.gateway.external.userservice.dto.AuthProfileUserDto;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 public interface AuthService {
 
@@ -21,6 +24,12 @@ public interface AuthService {
      * @return Mono<AuthDto>
      */
     Mono<AuthDto> refreshToken(RefreshTokenDto refreshTokenDto);
+
+    /**
+     * This method is used to load respective dashboard menu
+     * @return Mono<DashboardMenuDto>
+     */
+    Mono<List<DashboardMenuDto>> loadDashboardMenu();
 
     /**
      * This method is used to load user profile by valid authentication

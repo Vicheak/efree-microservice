@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -24,9 +23,6 @@ public class Role {
 
     @Column(name = "role_name", length = 100, unique = true, nullable = false)
     String name;
-
-    @OneToMany(mappedBy = "role")
-    List<UserRole> userRoles;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "roles_auths",

@@ -1,6 +1,6 @@
 package com.efree.gateway.external.userservice;
 
-import com.efree.gateway.dto.response.AuthProfileUserDto;
+import com.efree.gateway.external.userservice.dto.AuthProfileUserDto;
 import com.efree.gateway.external.userservice.dto.AuthUserDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

@@ -16,13 +16,13 @@ import java.time.LocalDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "users_roles",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role_id"}))
-public class UserRole {
+@Table(name = "users_authorities",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "authority_id"}))
+public class UserAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_role_id")
+    @Column(name = "user_authority_id")
     Long id;
 
     @ManyToOne
@@ -31,9 +31,9 @@ public class UserRole {
     User user;
 
     @ManyToOne
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "authority_id")
     @JsonBackReference
-    Role role;
+    Authority authority;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)

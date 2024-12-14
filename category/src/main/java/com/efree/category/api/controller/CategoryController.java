@@ -3,11 +3,14 @@ package com.efree.category.api.controller;
 import com.efree.category.api.base.BaseApi;
 import com.efree.category.api.dto.request.CategoryRequestDto;
 import com.efree.category.api.dto.response.CategoryResponseDto;
+import com.efree.category.api.external.fileservice.dto.FileDto;
 import com.efree.category.api.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -93,6 +96,22 @@ public class CategoryController {
                 .message("A category has been deleted successfully!")
                 .timestamp(LocalDateTime.now())
                 .payload(Map.of("message", "Payload has no content!"))
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(value = "/upload/single/{uuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public BaseApi<?> uploadCategoryImage(@PathVariable String uuid,
+                                          @RequestPart MultipartFile file) {
+
+        FileDto fileDto = categoryService.uploadCategoryImage(uuid, file);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.CREATED.value())
+                .message("A category image has been uploaded successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(fileDto)
                 .build();
     }
 

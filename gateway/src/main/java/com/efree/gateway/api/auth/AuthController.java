@@ -3,13 +3,16 @@ package com.efree.gateway.api.auth;
 import com.efree.gateway.dto.request.LoginDto;
 import com.efree.gateway.dto.request.RefreshTokenDto;
 import com.efree.gateway.dto.response.AuthDto;
-import com.efree.gateway.dto.response.AuthProfileUserDto;
+import com.efree.gateway.dto.response.DashboardMenuDto;
+import com.efree.gateway.external.userservice.dto.AuthProfileUserDto;
 import com.efree.gateway.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/gateway/api/v1/auth")
@@ -28,6 +31,12 @@ public class AuthController {
     @PostMapping("/refreshToken")
     public Mono<AuthDto> refreshToken(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
         return authService.refreshToken(refreshTokenDto);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/dashboard")
+    public Mono<List<DashboardMenuDto>> loadDashboardMenu(){
+        return authService.loadDashboardMenu();
     }
 
     @ResponseStatus(HttpStatus.OK)
