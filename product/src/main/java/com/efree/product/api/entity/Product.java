@@ -1,5 +1,6 @@
 package com.efree.product.api.entity;
 
+import com.efree.product.api.dto.response.ProductResponse;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -9,22 +10,25 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "products")
 public class Product {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "product_id")
-    String id;
+    UUID id;
 
     @Column(name = "category_id", nullable = false)
-    Long categoryId;
+    String categoryId;
 
     @Column(name = "product_name_en", nullable = false)
     String nameEn;
@@ -120,5 +124,37 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     List<Promotion> promotions;
+
+    public ProductResponse toResponse() {
+        return ProductResponse.builder()
+                .productId(this.id.toString())
+                .categoryId(this.categoryId)
+                .nameEn(this.nameEn)
+                .nameKh(this.nameKh)
+                .descriptionEn(this.descriptionEn)
+                .descriptionKh(this.descriptionKh)
+                .price(this.price)
+                .stockQty(this.stockQty)
+                .averageRating(this.averageRating)
+                .totalReview(this.totalReview)
+                .status(this.status)
+                .weightType(this.weightType)
+                .weight(this.weight)
+                .dimension(this.dimension)
+                .brand(this.brand)
+                .warrantyPeriod(this.warrantyPeriod)
+                .isFeatured(this.isFeatured)
+                .isNewArrival(this.isNewArrival)
+                .isBestSeller(this.isBestSeller)
+                .shippingClass(this.shippingClass)
+                .returnPolicy(this.returnPolicy)
+                .metaTitle(this.metaTitle)
+                .metaDescription(this.metaDescription)
+                .isSecondHand(this.isSecondHand)
+                .secondHandDescription(this.secondHandDescription)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .build();
+    }
 
 }
