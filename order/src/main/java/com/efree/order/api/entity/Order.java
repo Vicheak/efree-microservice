@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -20,13 +21,14 @@ import java.util.List;
 public class Order {
     @Id
     @Column(name = "order_id")
-    String id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    UUID id;
 
     @Column(name = "customer_id", nullable = false)
-    Long categoryId;
+    String customerId;
 
     @Column(name = "order_date")
-    String orderDate;
+    LocalDateTime orderDate;
 
     @Column(name = "total_amount", nullable = false, precision = 2)
     BigDecimal totalAmount;
