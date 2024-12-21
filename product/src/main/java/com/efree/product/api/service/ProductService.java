@@ -20,5 +20,6 @@ public interface ProductService {
     void deleteProductById(UUID productId);
 
     void postStock(PostStockRequest request);
+    List<ProductResponse> getProductsByCategory(String categoryId);
 
 }

@@ -99,5 +99,17 @@ public class ProductController {
                 .build();
         return new ResponseEntity<>(api, HttpStatus.OK);
     }
+    @GetMapping("/get-all-by-category/{categoryId}")
+    public ResponseEntity<BaseApi<Object>> getAllProductsByCategory(@PathVariable String categoryId) {
+        List<ProductResponse> responses = productService.getProductsByCategory(categoryId);
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Retrieved all products by category successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .payload(responses)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
 
 }

@@ -56,3 +56,35 @@ management:
   info:
     env:
       enabled: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      categoryClient:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+  timelimiter:
+    instances:
+      WorkspaceClientgetWorkspaceByWorkspaceIdStringUUID:
+        timeout-duration: 45s
+  retry:
+    instances:
+      WorkspaceClientgetWorkspaceByWorkspaceIdStringUUID:
+        max-attempts: 5
+        wait-duration: 1s
+        retry-exceptions:
+          - java.net.SocketTimeoutException
+          - java.io.IOException
+        ignore-exceptions:
+          - java.lang.IllegalArgumentException
+  bulkhead:
+    instances:
+      WorkspaceClientgetWorkspaceByWorkspaceIdStringUUID:
+        max-concurrent-calls: 50
+        max-wait-duration: 2s
+category-url:
+  url: http://localhost:8080

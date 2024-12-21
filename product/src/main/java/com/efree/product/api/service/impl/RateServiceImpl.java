@@ -55,7 +55,6 @@ public class RateServiceImpl implements RateService {
                 rateRepository.save(newRate);
             }
         } else {
-            // Unrate logic
             rateRepository.deleteByUserIdAndProductId(request.getUserId(), UUID.fromString(request.getProductId()));
         }
     }
