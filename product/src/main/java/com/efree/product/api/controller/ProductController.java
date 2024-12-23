@@ -7,6 +7,7 @@ import com.efree.product.api.dto.response.ProductResponse;
 import com.efree.product.api.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,10 +50,16 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<BaseApi<Object>> getAllProducts() {
-        List<ProductResponse> responses = productService.getAllProducts();
+    public ResponseEntity<BaseApi<Object>> getAllProducts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "nameEn") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        Page<ProductResponse> responses = productService.getAllProducts(page, size, sortBy, direction);
+
         BaseApi<Object> api = BaseApi.builder()
-                .message("All products has been retrieved successfully")
+                .message("All products retrieved successfully")
                 .code(HttpStatus.OK.value())
                 .isSuccess(true)
                 .payload(responses)
@@ -111,5 +118,44 @@ public class ProductController {
                 .build();
         return new ResponseEntity<>(api, HttpStatus.OK);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<BaseApi<Object>> searchProducts(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String field,
+            @RequestParam(defaultValue = "nameEn") String sortBy,
+            @RequestParam(defaultValue = "true") boolean asc,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<ProductResponse> responses = productService.searchProducts(keyword, field, sortBy, asc, page, size);
+
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Search results retrieved successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .payload(responses)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
+
+    @GetMapping("/filter/price")
+    public ResponseEntity<BaseApi<Object>> filterProductsByPrice(
+            @RequestParam(required = true) Double from,
+            @RequestParam(required = true) Double to
+    ) {
+        List<ProductResponse> responses = productService.filterProductsByPrice(from, to);
+
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Products filtered by price successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .payload(responses)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
+
 
 }
