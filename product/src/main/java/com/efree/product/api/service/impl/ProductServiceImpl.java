@@ -1,9 +1,9 @@
 package com.efree.product.api.service.impl;
 
-import com.efree.product.api.client.CategoryClient;
+import com.efree.product.api.external.categoryservice.CategoryClient;
 import com.efree.product.api.dto.request.PostStockRequest;
 import com.efree.product.api.dto.request.ProductRequest;
-import com.efree.product.api.dto.response.CategoryResponseDto;
+import com.efree.product.api.external.categoryservice.dto.CategoryResponseDto;
 import com.efree.product.api.dto.response.ProductResponse;
 import com.efree.product.api.entity.Product;
 import com.efree.product.api.enums.WeightType;

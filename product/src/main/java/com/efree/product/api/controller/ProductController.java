@@ -134,7 +134,7 @@ public class ProductController {
                 .message("Search results retrieved successfully")
                 .code(HttpStatus.OK.value())
                 .isSuccess(true)
-                .payload(responses)
+                .payload(responses.getContent())
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(api, HttpStatus.OK);

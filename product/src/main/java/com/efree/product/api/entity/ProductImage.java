@@ -39,11 +39,11 @@ public class ProductImage {
     Product product;
 
     //update bro!
-    public ProductImageResponse toResponse() {
+    public ProductImageResponse toResponse(String imageDownloadUrl) {
         return ProductImageResponse.builder()
                 .imageId(this.imageId.toString())
                 .imageBaseUrl("")
-                .imageDownloadUrl("")
+                .imageDownloadUrl(imageDownloadUrl)
                 .descriptionEn(this.descriptionEn)
                 .descriptionKh(this.descriptionKh)
                 .isBased(this.isBased)

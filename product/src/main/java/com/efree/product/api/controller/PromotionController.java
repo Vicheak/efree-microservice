@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -20,12 +21,9 @@ public class PromotionController {
 
     private final PromotionService promotionService;
 
-    //bro! please follow in API spec doc, I rejected merge request
-
-    //this one use request path like this /api/v1/promotions/{productUuid}
-    @PostMapping
-    public ResponseEntity<BaseApi<Object>> createPromotion(@RequestBody @Valid PromotionRequest promotionRequest) {
-        PromotionResponse promotion = promotionService.createPromotion(promotionRequest);
+    @PostMapping("/{productId}")
+    public ResponseEntity<BaseApi<Object>> createPromotion(@PathVariable UUID productId, @RequestBody @Valid PromotionRequest promotionRequest) {
+        PromotionResponse promotion = promotionService.createPromotion(productId, promotionRequest);
         BaseApi<Object> api = BaseApi.builder()
                 .message("New promotion has been posted successfully")
                 .code(HttpStatus.CREATED.value())
@@ -36,10 +34,9 @@ public class PromotionController {
         return new ResponseEntity<>(api, HttpStatus.CREATED);
     }
 
-    //wrong request path, follow in doc bro!
-    @PutMapping("/{id}")
-    public ResponseEntity<BaseApi<Object>> updatePromotion(@PathVariable UUID id, @RequestBody @Valid PromotionRequest promotionRequest) {
-        PromotionResponse promotion = promotionService.updatePromotion(id, promotionRequest);
+    @PatchMapping("/{productId}/{promotionId}")
+    public ResponseEntity<BaseApi<Object>> updatePromotion(@PathVariable UUID productId, @PathVariable UUID promotionId, @RequestBody @Valid PromotionRequest promotionRequest) {
+        PromotionResponse promotion = promotionService.updatePromotion(productId, promotionId, promotionRequest);
         BaseApi<Object> api = BaseApi.builder()
                 .message("Promotion has been updated successfully")
                 .code(HttpStatus.OK.value())
@@ -50,6 +47,40 @@ public class PromotionController {
         return new ResponseEntity<>(api, HttpStatus.OK);
     }
 
-    //please update your code bro, follow requirements, not just CRUD
+    @DeleteMapping("/{productId}/{promotionId}")
+    public ResponseEntity<BaseApi<Object>> deletePromotion(@PathVariable UUID productId, @PathVariable UUID promotionId) {
+        promotionService.deletePromotion(productId, promotionId);
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Promotion has been deleted successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
 
+    @PatchMapping("/disable/{productId}/{promotionId}")
+    public ResponseEntity<BaseApi<Object>> updateStatus(@PathVariable UUID productId, @PathVariable UUID promotionId, @RequestParam Boolean status) {
+        promotionService.updateStatus(productId, promotionId, status);
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Promotion status has been updated successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<BaseApi<Object>> getPromotionsByProductId(@PathVariable UUID productId) {
+        List<PromotionResponse> promotions = promotionService.getPromotionsByProductId(productId);
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Promotions retrieved successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .payload(promotions)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
 }

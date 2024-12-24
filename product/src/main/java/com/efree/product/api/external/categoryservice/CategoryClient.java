@@ -1,7 +1,7 @@
-package com.efree.product.api.client;
+package com.efree.product.api.external.categoryservice;
 
 import com.efree.product.api.base.BaseApi;
-import com.efree.product.api.dto.response.CategoryResponseDto;
+import com.efree.product.api.external.categoryservice.dto.CategoryResponseDto;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;

@@ -31,6 +31,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  servlet:
+    multipart:
+      max-request-size: 15MB
+      max-file-size: 15MB
 
   config:
     import: configserver:http://localhost:8888/
@@ -88,3 +92,11 @@ resilience4j:
         max-wait-duration: 2s
 category-url:
   url: http://localhost:8080
+
+rest:
+  file-service:
+    base-url: ${FILE_SERVICE_BASE_URL}
+file:
+  supported-extension: jpg,png,jpeg,webp,gif
+  base-uri: ${FILE_BASE_URI}
+  download-uri: ${FILE_DOWNLOAD_URI}

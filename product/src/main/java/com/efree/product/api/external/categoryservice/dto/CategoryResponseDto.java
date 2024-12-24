@@ -1,4 +1,4 @@
-package com.efree.product.api.dto.response;
+package com.efree.product.api.external.categoryservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
