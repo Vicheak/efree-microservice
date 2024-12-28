@@ -6,12 +6,14 @@ import com.efree.product.api.dto.response.FavoriteResponse;
 import com.efree.product.api.dto.response.ListFavResponse;
 import com.efree.product.api.service.FavoriteService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/favorites")
@@ -22,7 +24,7 @@ public class FavoriteController {
 
     @PostMapping
     @Operation(summary = "add to favorite")
-    public ResponseEntity<BaseApi<Object>> addProductToFavorite(@RequestBody FavoriteRequest request) {
+    public ResponseEntity<BaseApi<Object>> addProductToFavorite(@RequestBody @Valid FavoriteRequest request) {
         FavoriteResponse favoriteResponse = favoriteService.addProductToFavorite(request);
         BaseApi<Object> api = BaseApi.builder()
                 .code(HttpStatus.CREATED.value())
@@ -46,6 +48,20 @@ public class FavoriteController {
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(api, HttpStatus.OK);
+    }
+
+    @PostMapping("/remove-favorites")
+    @Operation(summary = "remove from favorite")
+    public ResponseEntity<BaseApi<Object>> removeProductFromFavorite(@RequestBody @Valid FavoriteRequest request) {
+        favoriteService.removeProductFromFavorite(request);
+        BaseApi<Object> api = BaseApi.builder()
+                .code(HttpStatus.CREATED.value())
+                .isSuccess(true)
+                .message("Remove from favorite performed")
+                .payload(Map.of("message", "favorite will be removed if there contains requested resource!"))
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.CREATED);
     }
 
 }

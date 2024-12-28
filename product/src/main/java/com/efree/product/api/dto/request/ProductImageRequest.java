@@ -16,7 +16,5 @@ public class ProductImageRequest {
     String descriptionEn;
     @NotNull
     String descriptionKh;
-    @NotNull
-    Boolean isBased;
 
 }

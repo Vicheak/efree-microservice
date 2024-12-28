@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -42,7 +43,7 @@ public class Product {
     @Column(name = "product_description_kh", columnDefinition = "TEXT")
     String descriptionKh;
 
-    @Column(name = "product_price", nullable = false, precision = 2)
+    @Column(name = "product_price", nullable = false)
     BigDecimal price;
 
     @Column(name = "product_stock_qty", nullable = false)
@@ -119,16 +120,21 @@ public class Product {
     @Column(nullable = false)
     LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     List<ProductImage> productImages;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     List<Promotion> promotions;
+
+    @ManyToMany(mappedBy = "products")
+    Set<Favorite> favorites;
+
+    @OneToMany(mappedBy = "product")
+    List<Rate> rates;
 
     public ProductResponse toResponse() {
         return ProductResponse.builder()
                 .productId(this.id.toString())
-                .categoryId(this.categoryId)
                 .nameEn(this.nameEn)
                 .nameKh(this.nameKh)
                 .descriptionEn(this.descriptionEn)

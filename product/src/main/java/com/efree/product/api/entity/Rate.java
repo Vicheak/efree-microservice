@@ -27,7 +27,6 @@ public class Rate {
     @Column(name = "rating_value", nullable = false)
     Integer ratingValue;
 
-    //update relationship here bro, many to many
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     Product product;

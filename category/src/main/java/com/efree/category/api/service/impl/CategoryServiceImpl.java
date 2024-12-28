@@ -105,6 +105,12 @@ public class CategoryServiceImpl implements CategoryService {
                                         .formatted(id))
                 );
 
+        //check category resource
+        if(!category.getProducts().isEmpty()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Category resource cannot be removed, it is used for another resource");
+        }
+
         categoryRepository.delete(category);
     }
 

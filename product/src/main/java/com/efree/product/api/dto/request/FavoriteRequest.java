@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -21,6 +21,6 @@ public class FavoriteRequest {
     String userId;
     @NotNull
     @Size(min = 1, message = "Please add to favorite at least a product!")
-    List<@NotBlank(message = "Product ID must not be blank!") String> productIds;
+    Set<@NotBlank(message = "Product ID must not be blank!") String> productIds;
 
 }

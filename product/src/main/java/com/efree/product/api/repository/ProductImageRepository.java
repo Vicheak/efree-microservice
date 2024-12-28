@@ -7,6 +7,6 @@ import java.util.UUID;
 
 public interface ProductImageRepository extends JpaRepository<ProductImage, UUID> {
 
-
+    void deleteByProduct_Id(UUID productId);
 
 }

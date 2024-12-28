@@ -1,11 +1,10 @@
 package com.efree.category.api.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -38,5 +37,8 @@ public class Category {
 
     @Column(name = "category_is_active", nullable = false)
     Boolean isActive;
+
+    @OneToMany(mappedBy = "category")
+    List<Product> products;
 
 }

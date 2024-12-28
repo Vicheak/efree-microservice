@@ -32,8 +32,18 @@ spring:
       hibernate:
         format_sql: true
 
+  servlet:
+    multipart:
+      max-request-size: 15MB
+      max-file-size: 15MB
+
   config:
     import: configserver:http://localhost:8888/
+
+file:
+  supported-extension: jpg,png,jpeg,webp,gif
+  base-uri: ${FILE_BASE_URI}
+  download-uri: ${FILE_DOWNLOAD_URI}
 
 eureka:
   instance:
@@ -56,3 +66,41 @@ management:
   info:
     env:
       enabled: true
+
+rest:
+  category-service:
+    base-url: ${CATEGORY_SERVICE_BASE_URL}
+  file-service:
+    base-url: ${FILE_SERVICE_BASE_URL}
+  user-service:
+    base-url: ${USER_SERVICE_BASE_URL}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      categoryRestClient:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+  timelimiter:
+    instances:
+      categoryRestClient:
+        timeout-duration: 45s
+  retry:
+    instances:
+      categoryRestClientRetry:
+        max-attempts: 5
+        wait-duration: 1s
+        retry-exceptions:
+          - java.net.SocketTimeoutException
+          - java.io.IOException
+        ignore-exceptions:
+          - java.lang.IllegalArgumentException
+  bulkhead:
+    instances:
+      categoryRestClientBulk:
+        max-concurrent-calls: 50
+        max-wait-duration: 2s

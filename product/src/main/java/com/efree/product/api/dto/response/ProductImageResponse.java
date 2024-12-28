@@ -12,7 +12,9 @@ import lombok.experimental.FieldDefaults;
 public class ProductImageResponse {
 
     String imageId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String imageBaseUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     String imageDownloadUrl;
     String descriptionEn;
     @JsonInclude(JsonInclude.Include.NON_NULL)

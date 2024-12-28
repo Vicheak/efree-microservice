@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -31,10 +32,10 @@ public class Favorite {
     @Column(name = "user_id", nullable = false)
     String userId;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "favorites_products", joinColumns = @JoinColumn(name = "favorite_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id"))
-    List<Product> products;
+    Set<Product> products;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

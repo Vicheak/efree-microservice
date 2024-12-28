@@ -1,5 +1,8 @@
 package com.efree.product.api.dto.response;
 
+import com.efree.product.api.external.categoryservice.dto.CategoryResponseDto;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,14 +17,18 @@ import java.time.LocalDateTime;
 public class ProductResponse {
 
     String productId;
-    String categoryId;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("category")
+    CategoryResponseDto categoryResponseDto;
     String nameEn;
     String nameKh;
     String descriptionEn;
     String descriptionKh;
     BigDecimal price;
     Long stockQty;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     BigDecimal averageRating;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     Long totalReview;
     Boolean status;
     String weightType;
@@ -38,7 +45,9 @@ public class ProductResponse {
     String metaDescription;
     Boolean isSecondHand;
     String secondHandDescription;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     LocalDateTime createdAt;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     LocalDateTime updatedAt;
 
 }
