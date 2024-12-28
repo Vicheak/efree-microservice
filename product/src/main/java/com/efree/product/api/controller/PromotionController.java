@@ -2,6 +2,7 @@ package com.efree.product.api.controller;
 
 import com.efree.product.api.base.BaseApi;
 import com.efree.product.api.dto.request.PromotionRequest;
+import com.efree.product.api.dto.request.PromotionUsageRequest;
 import com.efree.product.api.dto.response.PromotionResponse;
 import com.efree.product.api.service.PromotionService;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -20,12 +22,10 @@ public class PromotionController {
 
     private final PromotionService promotionService;
 
-    //bro! please follow in API spec doc, I rejected merge request
-
-    //this one use request path like this /api/v1/promotions/{productUuid}
-    @PostMapping
-    public ResponseEntity<BaseApi<Object>> createPromotion(@RequestBody @Valid PromotionRequest promotionRequest) {
-        PromotionResponse promotion = promotionService.createPromotion(promotionRequest);
+    @PostMapping("/{productId}")
+    public ResponseEntity<BaseApi<Object>> createPromotion(@PathVariable String productId,
+                                                           @RequestBody @Valid PromotionRequest promotionRequest) {
+        PromotionResponse promotion = promotionService.createPromotion(UUID.fromString(productId), promotionRequest);
         BaseApi<Object> api = BaseApi.builder()
                 .message("New promotion has been posted successfully")
                 .code(HttpStatus.CREATED.value())
@@ -36,10 +36,25 @@ public class PromotionController {
         return new ResponseEntity<>(api, HttpStatus.CREATED);
     }
 
-    //wrong request path, follow in doc bro!
-    @PutMapping("/{id}")
-    public ResponseEntity<BaseApi<Object>> updatePromotion(@PathVariable UUID id, @RequestBody @Valid PromotionRequest promotionRequest) {
-        PromotionResponse promotion = promotionService.updatePromotion(id, promotionRequest);
+    @GetMapping("/list/{productId}")
+    public ResponseEntity<BaseApi<Object>> getPromotionsByProductId(@PathVariable String productId) {
+        List<PromotionResponse> promotions = promotionService.getPromotionsByProductId(UUID.fromString(productId));
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Promotions has been retrieved successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .payload(promotions)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
+
+    @PutMapping("/{productId}/{promotionId}")
+    public ResponseEntity<BaseApi<Object>> updatePromotion(@PathVariable String productId,
+                                                           @PathVariable String promotionId,
+                                                           @RequestBody @Valid PromotionRequest promotionRequest) {
+        PromotionResponse promotion = promotionService.updatePromotion(UUID.fromString(productId),
+                UUID.fromString(promotionId), promotionRequest);
         BaseApi<Object> api = BaseApi.builder()
                 .message("Promotion has been updated successfully")
                 .code(HttpStatus.OK.value())
@@ -50,6 +65,47 @@ public class PromotionController {
         return new ResponseEntity<>(api, HttpStatus.OK);
     }
 
-    //please update your code bro, follow requirements, not just CRUD
+    @PutMapping("/disable/{productId}/{promotionId}")
+    public ResponseEntity<BaseApi<Object>> updateStatus(@PathVariable String productId,
+                                                        @PathVariable String promotionId,
+                                                        @RequestParam Boolean status) {
+        promotionService.updateStatus(UUID.fromString(productId), UUID.fromString(promotionId), status);
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Promotion status has been updated successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .payload("No response payload")
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{productId}/{promotionId}")
+    public ResponseEntity<BaseApi<Object>> deletePromotion(@PathVariable String productId,
+                                                           @PathVariable String promotionId) {
+        promotionService.deletePromotion(UUID.fromString(productId), UUID.fromString(promotionId));
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Promotion has been deleted successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .payload("No response payload")
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
+
+    //FOR CALL INTERNAL SERVICE
+    @PostMapping("/post-promotion")
+    public ResponseEntity<BaseApi<Object>> updatePromotionUsage(@RequestBody @Valid PromotionUsageRequest promotionUsageRequest) {
+        promotionService.updatePromotionUsage(promotionUsageRequest);
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Promotion usage has been posted successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .payload("No response payload")
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
 
 }

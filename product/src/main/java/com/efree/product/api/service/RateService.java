@@ -4,8 +4,8 @@ import com.efree.product.api.dto.request.RateRequest;
 
 public interface RateService {
 
-    void toggleRate(RateRequest request);
+    void rateProduct(RateRequest request);
 
-    Integer countRateByProductId(String productId);
+    Long countRateByProductId(String productId);
 
 }

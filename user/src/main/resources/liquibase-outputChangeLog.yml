@@ -1,7 +1,7 @@
 databaseChangeLog:
 - changeSet:
-    id: 1733328228090-1
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-1
+    author: cheakdev@gmail.com (generated)
     changes:
     - createTable:
         columns:
@@ -37,6 +37,9 @@ databaseChangeLog:
             name: user_gender
             type: VARCHAR(20)
         - column:
+            name: image_url
+            type: VARCHAR(255)
+        - column:
             name: is_enabled
             type: BOOLEAN
         - column:
@@ -66,8 +69,8 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: users
 - changeSet:
-    id: 1733328228090-2
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-2
+    author: cheakdev@gmail.com (generated)
     changes:
     - createTable:
         columns:
@@ -86,8 +89,8 @@ databaseChangeLog:
             type: VARCHAR(120)
         tableName: authorities
 - changeSet:
-    id: 1733328228090-3
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-3
+    author: cheakdev@gmail.com (generated)
     changes:
     - createTable:
         columns:
@@ -106,87 +109,8 @@ databaseChangeLog:
             type: VARCHAR(100)
         tableName: roles
 - changeSet:
-    id: 1733328228090-4
-    author: suonvicheak991@gmail.com (generated)
-    changes:
-    - createTable:
-        columns:
-        - column:
-            autoIncrement: true
-            constraints:
-              nullable: false
-              primaryKey: true
-              primaryKeyName: users_roles_pkey
-            name: user_role_id
-            type: BIGINT
-        - column:
-            constraints:
-              nullable: false
-            name: created_at
-            type: TIMESTAMP WITHOUT TIME ZONE
-        - column:
-            constraints:
-              nullable: false
-            name: updated_at
-            type: TIMESTAMP WITHOUT TIME ZONE
-        - column:
-            name: role_id
-            type: INTEGER
-        - column:
-            name: user_id
-            type: VARCHAR(255)
-        tableName: users_roles
-- changeSet:
-    id: 1733328228090-5
-    author: suonvicheak991@gmail.com (generated)
-    changes:
-    - addUniqueConstraint:
-        columnNames: user_email
-        constraintName: uk33uo7vet9c79ydfuwg1w848f
-        tableName: users
-- changeSet:
-    id: 1733328228090-6
-    author: suonvicheak991@gmail.com (generated)
-    changes:
-    - addUniqueConstraint:
-        columnNames: user_username
-        constraintName: ukbcy4eb602iyorjjc2cklf53cf
-        tableName: users
-- changeSet:
-    id: 1733328228090-7
-    author: suonvicheak991@gmail.com (generated)
-    changes:
-    - addUniqueConstraint:
-        columnNames: user_phone_number
-        constraintName: ukte75vby8rv7y1qqply0jty8cy
-        tableName: users
-- changeSet:
-    id: 1733328228090-8
-    author: suonvicheak991@gmail.com (generated)
-    changes:
-    - addUniqueConstraint:
-        columnNames: authority_name
-        constraintName: uk4gictf1bsadhdebtwbanm6d21
-        tableName: authorities
-- changeSet:
-    id: 1733328228090-9
-    author: suonvicheak991@gmail.com (generated)
-    changes:
-    - addUniqueConstraint:
-        columnNames: role_name
-        constraintName: uk716hgxp60ym1lifrdgp67xt5k
-        tableName: roles
-- changeSet:
-    id: 1733328228090-10
-    author: suonvicheak991@gmail.com (generated)
-    changes:
-    - addUniqueConstraint:
-        columnNames: user_id, role_id
-        constraintName: ukq3r1u8cne2rw2hkr899xuh7vj
-        tableName: users_roles
-- changeSet:
-    id: 1733328228090-11
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-4
+    author: cheakdev@gmail.com (generated)
     changes:
     - createTable:
         columns:
@@ -207,9 +131,13 @@ databaseChangeLog:
             name: category_image_url
             type: VARCHAR(255)
         - column:
+            constraints:
+              nullable: false
             name: category_is_active
             type: BOOLEAN
         - column:
+            constraints:
+              nullable: false
             name: category_name_en
             type: VARCHAR(255)
         - column:
@@ -217,8 +145,232 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: categories
 - changeSet:
-    id: 1733328228090-12
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-5
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: client_contents_pkey
+            name: client_content_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: content_type
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: content_description_en
+            type: TEXT
+        - column:
+            name: content_description_kh
+            type: TEXT
+        - column:
+            name: is_used
+            type: BOOLEAN
+        - column:
+            name: content_reference
+            type: VARCHAR(255)
+        tableName: client_contents
+- changeSet:
+    id: 1735389282834-6
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: users_authorities_pkey
+            name: user_authority_id
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: created_at
+            type: TIMESTAMP WITHOUT TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: updated_at
+            type: TIMESTAMP WITHOUT TIME ZONE
+        - column:
+            name: authority_id
+            type: INTEGER
+        - column:
+            name: user_id
+            type: VARCHAR(255)
+        tableName: users_authorities
+- changeSet:
+    id: 1735389282834-7
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: user_email
+        constraintName: uk33uo7vet9c79ydfuwg1w848f
+        tableName: users
+- changeSet:
+    id: 1735389282834-8
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: user_username
+        constraintName: ukbcy4eb602iyorjjc2cklf53cf
+        tableName: users
+- changeSet:
+    id: 1735389282834-9
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: user_phone_number
+        constraintName: ukte75vby8rv7y1qqply0jty8cy
+        tableName: users
+- changeSet:
+    id: 1735389282834-10
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: authority_name
+        constraintName: uk4gictf1bsadhdebtwbanm6d21
+        tableName: authorities
+- changeSet:
+    id: 1735389282834-11
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: role_name
+        constraintName: uk716hgxp60ym1lifrdgp67xt5k
+        tableName: roles
+- changeSet:
+    id: 1735389282834-12
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: category_name_kh
+        constraintName: ukgrngqg83f28b1c8qrxs0ryswa
+        tableName: categories
+- changeSet:
+    id: 1735389282834-13
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: category_name_en
+        constraintName: uklwjbjhjarsp2kwjsarf0nkv7d
+        tableName: categories
+- changeSet:
+    id: 1735389282834-14
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: content_type
+        constraintName: ukouunyvht2vlahwlu3dg3f4v4j
+        tableName: client_contents
+- changeSet:
+    id: 1735389282834-15
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: user_id, authority_id
+        constraintName: uktitvpqk7gla63inv4onq5bf8m
+        tableName: users_authorities
+- changeSet:
+    id: 1735389282834-16
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: banners_pkey
+            name: banner_id
+            type: VARCHAR(255)
+        - column:
+            name: base_dimension
+            type: VARCHAR(255)
+        - column:
+            name: image_name_base
+            type: VARCHAR(255)
+        - column:
+            name: banner_description_en
+            type: VARCHAR(255)
+        - column:
+            name: banner_description_kh
+            type: VARCHAR(255)
+        - column:
+            name: image_name_mobile
+            type: VARCHAR(255)
+        - column:
+            name: is_used
+            type: BOOLEAN
+        - column:
+            name: mobile_dimension
+            type: VARCHAR(255)
+        - column:
+            name: reference_url
+            type: VARCHAR(255)
+        tableName: banners
+- changeSet:
+    id: 1735389282834-17
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: favorites_pkey
+            name: favorite_id
+            type: UUID
+        - column:
+            constraints:
+              nullable: false
+            name: created_at
+            type: TIMESTAMP WITHOUT TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: updated_at
+            type: TIMESTAMP WITHOUT TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: VARCHAR(255)
+        tableName: favorites
+- changeSet:
+    id: 1735389282834-18
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: favorites_products_pkey
+            name: favorite_id
+            type: UUID
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: favorites_products_pkey
+            name: product_id
+            type: UUID
+        tableName: favorites_products
+- changeSet:
+    id: 1735389282834-19
+    author: cheakdev@gmail.com (generated)
     changes:
     - createTable:
         columns:
@@ -228,7 +380,7 @@ databaseChangeLog:
               primaryKey: true
               primaryKeyName: product_images_pkey
             name: image_id
-            type: VARCHAR(255)
+            type: UUID
         - column:
             name: description_en
             type: TEXT
@@ -247,11 +399,11 @@ databaseChangeLog:
             constraints:
               nullable: false
             name: product_id
-            type: VARCHAR(255)
+            type: UUID
         tableName: product_images
 - changeSet:
-    id: 1733328228090-13
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-20
+    author: cheakdev@gmail.com (generated)
     changes:
     - createTable:
         columns:
@@ -261,18 +413,13 @@ databaseChangeLog:
               primaryKey: true
               primaryKeyName: products_pkey
             name: product_id
-            type: VARCHAR(255)
+            type: UUID
         - column:
             name: product_avg_rating
             type: numeric(38, 2)
         - column:
             name: product_brand
             type: VARCHAR(100)
-        - column:
-            constraints:
-              nullable: false
-            name: category_id
-            type: BIGINT
         - column:
             constraints:
               nullable: false
@@ -322,7 +469,7 @@ databaseChangeLog:
             constraints:
               nullable: false
             name: product_price
-            type: numeric(2)
+            type: numeric(38, 2)
         - column:
             name: product_return_policy
             type: TEXT
@@ -366,10 +513,15 @@ databaseChangeLog:
         - column:
             name: product_weight_type
             type: VARCHAR(50)
+        - column:
+            constraints:
+              nullable: false
+            name: category_id
+            type: VARCHAR(255)
         tableName: products
 - changeSet:
-    id: 1733328228090-14
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-21
+    author: cheakdev@gmail.com (generated)
     changes:
     - createTable:
         columns:
@@ -379,7 +531,7 @@ databaseChangeLog:
               primaryKey: true
               primaryKeyName: promotions_pkey
             name: promotion_id
-            type: VARCHAR(255)
+            type: UUID
         - column:
             name: applicable_customer
             type: TEXT
@@ -421,11 +573,40 @@ databaseChangeLog:
             constraints:
               nullable: false
             name: product_id
-            type: VARCHAR(255)
+            type: UUID
         tableName: promotions
 - changeSet:
-    id: 1733328228090-15
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-22
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: rates_pkey
+            name: rate_id
+            type: UUID
+        - column:
+            constraints:
+              nullable: false
+            name: rating_value
+            type: INTEGER
+        - column:
+            constraints:
+              nullable: false
+            name: user_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+            name: product_id
+            type: UUID
+        tableName: rates
+- changeSet:
+    id: 1735389282834-23
+    author: cheakdev@gmail.com (generated)
     changes:
     - createTable:
         columns:
@@ -445,23 +626,23 @@ databaseChangeLog:
             type: INTEGER
         tableName: roles_auths
 - changeSet:
-    id: 1733328228090-16
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-24
+    author: cheakdev@gmail.com (generated)
     changes:
     - addForeignKeyConstraint:
-        baseColumnNames: user_id
-        baseTableName: users_roles
-        constraintName: fk2o0jvgh89lemvvo17cbqvdxaa
+        baseColumnNames: favorite_id
+        baseTableName: favorites_products
+        constraintName: fk2b4yimmdbm441vj3mbkf2gb4v
         deferrable: false
         initiallyDeferred: false
         onDelete: NO ACTION
         onUpdate: NO ACTION
-        referencedColumnNames: user_uuid
-        referencedTableName: users
+        referencedColumnNames: favorite_id
+        referencedTableName: favorites
         validate: true
 - changeSet:
-    id: 1733328228090-17
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-25
+    author: cheakdev@gmail.com (generated)
     changes:
     - addForeignKeyConstraint:
         baseColumnNames: auth_id
@@ -475,8 +656,23 @@ databaseChangeLog:
         referencedTableName: authorities
         validate: true
 - changeSet:
-    id: 1733328228090-18
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-26
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: product_id
+        baseTableName: rates
+        constraintName: fk4mdsmkrr7od84tpgxto2v3t2e
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: product_id
+        referencedTableName: products
+        validate: true
+- changeSet:
+    id: 1735389282834-27
+    author: cheakdev@gmail.com (generated)
     changes:
     - addForeignKeyConstraint:
         baseColumnNames: product_id
@@ -490,8 +686,8 @@ databaseChangeLog:
         referencedTableName: products
         validate: true
 - changeSet:
-    id: 1733328228090-19
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-28
+    author: cheakdev@gmail.com (generated)
     changes:
     - addForeignKeyConstraint:
         baseColumnNames: role_id
@@ -505,23 +701,68 @@ databaseChangeLog:
         referencedTableName: roles
         validate: true
 - changeSet:
-    id: 1733328228090-20
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-29
+    author: cheakdev@gmail.com (generated)
     changes:
     - addForeignKeyConstraint:
-        baseColumnNames: role_id
-        baseTableName: users_roles
-        constraintName: fkj6m8fwv7oqv74fcehir1a9ffy
+        baseColumnNames: authority_id
+        baseTableName: users_authorities
+        constraintName: fkdsfxx5g8x8mnxne1fe0yxhjhq
         deferrable: false
         initiallyDeferred: false
         onDelete: NO ACTION
         onUpdate: NO ACTION
-        referencedColumnNames: role_id
-        referencedTableName: roles
+        referencedColumnNames: authority_id
+        referencedTableName: authorities
         validate: true
 - changeSet:
-    id: 1733328228090-21
-    author: suonvicheak991@gmail.com (generated)
+    id: 1735389282834-30
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: product_id
+        baseTableName: favorites_products
+        constraintName: fkkxu2236bgdcuebl15ciwp2ran
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: product_id
+        referencedTableName: products
+        validate: true
+- changeSet:
+    id: 1735389282834-31
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: category_id
+        baseTableName: products
+        constraintName: fkog2rp4qthbtt2lfyhfo32lsw9
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: category_id
+        referencedTableName: categories
+        validate: true
+- changeSet:
+    id: 1735389282834-32
+    author: cheakdev@gmail.com (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: user_id
+        baseTableName: users_authorities
+        constraintName: fkq3lq694rr66e6kpo2h84ad92q
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: user_uuid
+        referencedTableName: users
+        validate: true
+- changeSet:
+    id: 1735389282834-33
+    author: cheakdev@gmail.com (generated)
     changes:
     - addForeignKeyConstraint:
         baseColumnNames: product_id
@@ -534,3 +775,4 @@ databaseChangeLog:
         referencedColumnNames: product_id
         referencedTableName: products
         validate: true
+

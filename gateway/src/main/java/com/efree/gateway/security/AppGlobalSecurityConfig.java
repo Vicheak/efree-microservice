@@ -92,7 +92,10 @@ public class AppGlobalSecurityConfig {
             exchange.pathMatchers(HttpMethod.DELETE, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority(CATEGORY_DELETE.getAuthority());
 
             //PRODUCT SERVICE
-            exchange.pathMatchers(HttpMethod.GET, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_READ.getAuthority());
+            exchange.pathMatchers("/gateway/PRODUCT/api/v1/rates/count-by-product", "/gateway/product/api/v1/rates/count-by-product", "/product-service/api/v1/rates/count-by-product").permitAll();
+            exchange.pathMatchers("/gateway/PRODUCT/api/v1/favorites/**", "/gateway/product/api/v1/favorites/**", "/product-service/api/v1/favorites/**").authenticated();
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/PRODUCT/api/v1/rates", "/gateway/product/api/v1/rates", "/product-service/api/v1/rates").authenticated();
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").permitAll();
             exchange.pathMatchers(HttpMethod.POST, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_WRITE.getAuthority());
             exchange.pathMatchers(HttpMethod.PUT, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_UPDATE.getAuthority());
             exchange.pathMatchers(HttpMethod.PATCH, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_UPDATE.getAuthority());

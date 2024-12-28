@@ -10,4 +10,6 @@ public interface FavoriteService {
 
     ListFavResponse getAllFavoritesByUserId(String userId);
 
+    void removeProductFromFavorite(FavoriteRequest request);
+
 }

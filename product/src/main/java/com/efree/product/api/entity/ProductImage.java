@@ -1,6 +1,6 @@
 package com.efree.product.api.entity;
 
-import com.efree.product.api.dto.response.ProductImageResponse;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -34,20 +34,9 @@ public class ProductImage {
     @Column(name = "is_based")
     Boolean isBased;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
-
-    //update bro!
-    public ProductImageResponse toResponse() {
-        return ProductImageResponse.builder()
-                .imageId(this.imageId.toString())
-                .imageBaseUrl("")
-                .imageDownloadUrl("")
-                .descriptionEn(this.descriptionEn)
-                .descriptionKh(this.descriptionKh)
-                .isBased(this.isBased)
-                .build();
-    }
 
 }

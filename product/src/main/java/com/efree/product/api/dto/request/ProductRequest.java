@@ -1,5 +1,6 @@
 package com.efree.product.api.dto.request;
 
+import com.efree.product.api.external.categoryservice.dto.CategoryResponseDto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -66,5 +67,8 @@ public class ProductRequest {
     Boolean isSecondHand;
     @NotNull
     String secondHandDescription;
+
+    //for mapping
+    CategoryResponseDto categoryResponseDto;
 
 }

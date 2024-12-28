@@ -1,6 +1,7 @@
 package com.efree.product.api.entity;
 
 import com.efree.product.api.dto.response.PromotionResponse;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -56,6 +57,7 @@ public class Promotion {
     @Column(name = "promotion_status")
     Boolean status;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
