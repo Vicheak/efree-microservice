@@ -16,7 +16,7 @@ spring:
     name: configserver
 
   profiles:
-    active: prod
+    active: dev
 
   cloud:
     config:

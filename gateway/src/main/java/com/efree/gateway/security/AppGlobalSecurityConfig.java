@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtReactiveAuthenticationManager;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
 
 import java.util.UUID;
 
@@ -36,6 +37,7 @@ import static com.efree.gateway.util.Authority.*;
 @RequiredArgsConstructor
 public class AppGlobalSecurityConfig {
 
+    private final CorsConfigurationSource corsConfigurationSource;
     private final ReactiveUserDetailsService userDetailsServiceImpl;
     private final PasswordEncoder passwordEncoder;
     private final KeyUtil keyUtil;
@@ -56,6 +58,8 @@ public class AppGlobalSecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChainConfig(ServerHttpSecurity http) {
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource));
+
         http.authorizeExchange(exchange -> {
             exchange.pathMatchers(
                     // For external resources
@@ -102,8 +106,10 @@ public class AppGlobalSecurityConfig {
             exchange.pathMatchers(HttpMethod.DELETE, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_DELETE.getAuthority());
 
             //ORDER SERVICE
+            exchange.pathMatchers("/gateway/ORDER/**", "/gateway/order/**", "/order-service/**").authenticated();
 
             //PAYMENT SERVICE
+            exchange.pathMatchers("/gateway/PAYMENT/**", "/gateway/payment/**", "/payment-service/**").authenticated();
 
             //FILE SERVICE
             exchange.pathMatchers(HttpMethod.GET, "/gateway/RESOURCE/api/v1/banners/**", "/gateway/resource/api/v1/banners/**", "/file-service/api/v1/banners/**").permitAll();

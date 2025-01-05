@@ -16,10 +16,11 @@ spring:
     name: api-gateway
 
   profiles:
-    active: dev
+    active: prod
 
   config:
-    import: optional:configserver:http://localhost:8888/
+#    import: optional:configserver:http://localhost:8888/
+    import: optional:configserver:http://configuration-service-svc.microservice.svc.prod:8888/
 
 #  security:
 #    user:
@@ -32,6 +33,12 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+
+    kubernetes:
+      discovery:
+        enabled: false
+        all-namespaces: true  # Optional, set to true if you want to discover services across all namespaces
+#        discovery-server-url: https://kubernetes.default.svc.prod
 
   main:
 #    web-application-type: servlet #FOR SERVLET-BASED GATEWAY
@@ -66,7 +73,19 @@ logging:
   level:
     org:
       springframework:
-        security=DEBUG:
+        http:
+          client: DEBUG
+        security: DEBUG
+#        web:
+#          reactive:
+#            function:
+#              client: DEBUG
+#      cloud:
+#        gateway: DEBUG
+#    com:
+#      netflix:
+#        discovery: DEBUG
+#        ribbon: DEBUG
 
 rest:
   user-service:
