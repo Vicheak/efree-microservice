@@ -22,6 +22,12 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     url: ${SPRING_DATASOURCE_URL}
+    hikari:
+      maximum-pool-size: 20 # For CP Hikari
+      connection-timeout: 10000 # 10s
+      idle-timeout: 10000 # 10s
+      minimum-idle: 10
+      max-lifetime: 300000 # 300s
 
   jpa:
     open-in-view: false
@@ -31,9 +37,13 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        able_lazy_load_no_trans: true
 
   config:
-    import: configserver:http://localhost:8888/
+    import: optional:configserver:http://localhost:8888/
+#    import: optional:configserver:http://configuration-service-svc.microservice.svc.prod:8888/
 
 eureka:
   instance:
@@ -56,3 +66,10 @@ management:
   info:
     env:
       enabled: true
+
+# Stripe Payment Gateway API context config
+stripe:
+  publishableKey: ${PAYMENT_PUBLISHABLE_KEY}
+  secretKey: ${PAYMENT_SECRET_KEY}
+  success-url: ${PAYMENT_SUCCESS_URL}
+  cancel-url: ${PAYMENT_CANCEL_URL}

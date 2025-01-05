@@ -16,21 +16,30 @@ spring:
     name: product-service
 
   profiles:
-    active: dev
+    active: prod
 
   datasource:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     url: ${SPRING_DATASOURCE_URL}
+    hikari:
+      maximum-pool-size: 20 # For CP Hikari
+      connection-timeout: 10000 # 10s
+      idle-timeout: 10000 # 10s
+      minimum-idle: 10
+      max-lifetime: 300000 # 300s
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
         format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        able_lazy_load_no_trans: true
 
   servlet:
     multipart:
@@ -38,7 +47,8 @@ spring:
       max-file-size: 15MB
 
   config:
-    import: configserver:http://localhost:8888/
+#    import: optional:configserver:http://localhost:8888/
+    import: optional:configserver:http://configuration-service-svc.microservice.svc.prod:8888/
 
 file:
   supported-extension: jpg,png,jpeg,webp,gif
@@ -74,33 +84,3 @@ rest:
     base-url: ${FILE_SERVICE_BASE_URL}
   user-service:
     base-url: ${USER_SERVICE_BASE_URL}
-
-resilience4j:
-  circuitbreaker:
-    instances:
-      categoryRestClient:
-        registerHealthIndicator: true
-        slidingWindowSize: 5
-        minimumNumberOfCalls: 3
-        failureRateThreshold: 50
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-  timelimiter:
-    instances:
-      categoryRestClient:
-        timeout-duration: 45s
-  retry:
-    instances:
-      categoryRestClientRetry:
-        max-attempts: 5
-        wait-duration: 1s
-        retry-exceptions:
-          - java.net.SocketTimeoutException
-          - java.io.IOException
-        ignore-exceptions:
-          - java.lang.IllegalArgumentException
-  bulkhead:
-    instances:
-      categoryRestClientBulk:
-        max-concurrent-calls: 50
-        max-wait-duration: 2s
