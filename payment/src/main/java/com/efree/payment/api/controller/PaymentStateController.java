@@ -16,20 +16,32 @@ public class PaymentStateController {
     private final PaymentService paymentService;
 
     @GetMapping("/success")
-    public String paymentSuccess(@RequestParam("orderId") String orderId){
+    public String paymentSuccess(@RequestParam("orderId") String orderId,
+                                 @RequestParam("orderRef") String orderRef,
+                                 @RequestParam("paymentId") String paymentId,
+                                 @RequestParam("paymentToken") String paymentToken) {
         ValidatePaymentRequest validatePaymentRequest = ValidatePaymentRequest.builder()
                 .isPaymentSuccess(true)
                 .orderId(orderId)
+                .orderRef(orderRef)
+                .paymentId(paymentId)
+                .paymentToken(paymentToken)
                 .build();
         paymentService.validatePayment(validatePaymentRequest);
         return "payment-success";
     }
 
     @GetMapping("/cancel")
-    public String paymentCancel(@RequestParam("orderId") String orderId){
+    public String paymentCancel(@RequestParam("orderId") String orderId,
+                                @RequestParam("orderRef") String orderRef,
+                                @RequestParam("paymentId") String paymentId,
+                                @RequestParam("paymentToken") String paymentToken) {
         ValidatePaymentRequest validatePaymentRequest = ValidatePaymentRequest.builder()
                 .isPaymentSuccess(false)
                 .orderId(orderId)
+                .orderRef(orderRef)
+                .paymentId(paymentId)
+                .paymentToken(paymentToken)
                 .build();
         paymentService.validatePayment(validatePaymentRequest);
         return "payment-cancel";

@@ -4,10 +4,12 @@ import com.efree.payment.api.dto.request.PaymentRequest;
 import com.efree.payment.api.dto.request.ValidatePaymentRequest;
 import com.efree.payment.api.dto.response.PaymentResponse;
 import com.efree.payment.api.entity.Order;
+import com.efree.payment.api.entity.Payment;
 import com.efree.payment.api.exception.RedirectToPageException;
 import com.efree.payment.api.repository.OrderRepository;
 import com.efree.payment.api.repository.PaymentRepository;
 import com.efree.payment.api.service.PaymentService;
+import com.efree.payment.api.util.EPaymentStatus;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -16,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -70,8 +73,16 @@ public class PaymentServiceImpl implements PaymentService {
         SessionCreateParams params =
                 SessionCreateParams.builder()
                         .setMode(SessionCreateParams.Mode.PAYMENT)
-                        .setSuccessUrl(paymentSuccessUrl + "?orderId=" + paymentRequest.orderId())
-                        .setCancelUrl(paymentCancelUrl + "?orderId=" + paymentRequest.orderId())
+                        .setSuccessUrl(paymentSuccessUrl +
+                                "?paymentToken=" + paymentRequest.paymentToken() +
+                                "&orderId=" + paymentRequest.orderId() +
+                                "&orderRef=" + paymentRequest.orderRef() +
+                                "&paymentId=" + paymentRequest.paymentId())
+                        .setCancelUrl(paymentCancelUrl +
+                                "?paymentToken=" + paymentRequest.paymentToken() +
+                                "&orderId=" + paymentRequest.orderId() +
+                                "&orderRef=" + paymentRequest.orderRef() +
+                                "&paymentId=" + paymentRequest.paymentId())
                         .addLineItem(lineItem)
                         .build();
 
@@ -110,12 +121,27 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
     }
 
+    @Transactional
     @Override
     public void validatePayment(ValidatePaymentRequest validatePaymentRequest) {
         Optional<Order> orderOptional = orderRepository.findById(validatePaymentRequest.orderId());
-        if(orderOptional.isEmpty()){
-            throw new RedirectToPageException("order-not-found");
+        Optional<Payment> paymentOptional = paymentRepository.findByPaymentIdAndPaymentToken(
+                validatePaymentRequest.paymentId(), validatePaymentRequest.paymentToken());
+        if (orderOptional.isEmpty() || paymentOptional.isEmpty() ) {
+            throw new RedirectToPageException("payment-unauth");
         }
+        Order order = orderOptional.get();
+        order.setPaymentStatus(validatePaymentRequest.isPaymentSuccess() ?
+                EPaymentStatus.SUCCESS.name() : EPaymentStatus.CANCEL.name());
+
+        Payment payment = paymentOptional.get();
+        payment.setTransactionId(validatePaymentRequest.orderRef());
+        payment.setPaymentStatus(validatePaymentRequest.isPaymentSuccess() ?
+                EPaymentStatus.SUCCESS.name() : EPaymentStatus.CANCEL.name());
+        payment.setPaymentToken(null);
+
+        orderRepository.save(order);
+        paymentRepository.save(payment);
     }
 
 }

@@ -49,6 +49,9 @@ public class Order implements Serializable {
     @Column(name = "is_prepared", nullable = false)
     Boolean isPrepared;
 
+    @Column(name = "order_contact", nullable = false)
+    String orderContact;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;
