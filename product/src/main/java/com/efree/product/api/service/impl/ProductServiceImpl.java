@@ -194,25 +194,25 @@ public class ProductServiceImpl implements ProductService {
                 categoryServiceRestClientConsumer.loadCategoryById(request.getCategoryId());
         request.setCategoryResponseDto(categoryResponseDto);
 
-        if (isForNew) {
-            // Check for duplicate product name
-            if (productRepository.existsByNameEnIsIgnoreCase(request.getNameEn())) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                        "Product's name conflicts resource in the system!");
-            }
-
-            if (Objects.nonNull(request.getNameKh()) && !request.getNameKh().isEmpty()) {
-                if (productRepository.existsByNameKhIsIgnoreCase(request.getNameKh()))
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "Product's name conflicts resource in the system!");
-            }
-        }
+//        if (isForNew) {
+//            // Check for duplicate product name
+//            if (productRepository.existsByNameEnIsIgnoreCase(request.getNameEn())) {
+//                throw new ResponseStatusException(HttpStatus.CONFLICT,
+//                        "Product's name conflicts resource in the system!");
+//            }
+//
+//            if (Objects.nonNull(request.getNameKh()) && !request.getNameKh().isEmpty()) {
+//                if (productRepository.existsByNameKhIsIgnoreCase(request.getNameKh()))
+//                    throw new ResponseStatusException(HttpStatus.CONFLICT,
+//                            "Product's name conflicts resource in the system!");
+//            }
+//        }
 
         // Validate weight type
-        if (!WeightType.isValid(request.getWeightType())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid weight type. Allowed values: " + WeightType.allowedValues());
-        }
+//        if (!WeightType.isValid(request.getWeightType())) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+//                    "Invalid weight type. Allowed values: " + WeightType.allowedValues());
+//        }
     }
 
     private PageRequest buildPageRequest(int page, int size, String sortBy, String direction) {

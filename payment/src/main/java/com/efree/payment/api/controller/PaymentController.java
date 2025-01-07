@@ -20,7 +20,7 @@ public class PaymentController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public BaseApi<?> createNewCategory(@RequestBody @Valid PaymentRequest paymentRequest) {
+    public BaseApi<?> proceedPayment(@RequestBody @Valid PaymentRequest paymentRequest) {
 
         PaymentResponse paymentResponse = paymentService.proceedPayment(paymentRequest);
 

@@ -46,6 +46,9 @@ public class Payment implements Serializable {
     @Column(name = "payment_status", length = 50, nullable = false)
     String paymentStatus;
 
+    @Column(name = "payment_token")
+    String paymentToken;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     LocalDateTime createdAt;

@@ -10,6 +10,10 @@ import java.math.BigDecimal;
 @Builder
 public record PaymentRequest(@NotBlank(message = "Order ID must not be blank!")
                              String orderId,
+                             @NotBlank(message = "Payment ID must not be blank!")
+                             String paymentId,
+                             @NotBlank(message = "Payment Token must not be blank!")
+                             String paymentToken,
                              @NotBlank(message = "Order Ref must not be blank!")
                              String orderRef,
                              @NotNull(message = "Please include valid payment amount!'")

@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -19,22 +20,26 @@ import java.time.LocalDateTime;
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@IdClass(OrderDetailId.class)
 @Table(name = "order_details")
 public class OrderDetail implements Serializable {
 
-    @EmbeddedId
-    OrderDetailId orderDetailId;
+    @Id
+    @Column(name = "order_id")
+    String orderId;
+
+    @Id
+    @Column(name = "product_id")
+    UUID productId;
 
     @JsonBackReference
     @ManyToOne
-    @MapsId("orderId")
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", insertable = false, updatable = false)
     Order order;
 
     @JsonBackReference
     @ManyToOne
-    @MapsId("productId")
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
     Product product;
 
     @Column(name = "quantity", nullable = false)

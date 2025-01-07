@@ -4,5 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record ValidatePaymentRequest(Boolean isPaymentSuccess,
-                                     String orderId) {
+                                     String orderId,
+                                     String orderRef,
+                                     String paymentId,
+                                     String paymentToken) {
 }
