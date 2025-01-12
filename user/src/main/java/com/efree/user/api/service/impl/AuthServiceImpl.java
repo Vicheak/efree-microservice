@@ -82,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
         updateVerifiedCodeAndSendMail(newUser, subjectMail);
     }
 
+    @Transactional
     @Override
     public void verify(VerifyDto verifyDto) {
         //load the unverified user by email and verified code
@@ -139,6 +140,7 @@ public class AuthServiceImpl implements AuthService {
         updateVerifiedCodeAndSendMail(user, subjectMail);
     }
 
+    @Transactional
     @Override
     public void resetPassword(ResetPasswordDto resetPasswordDto) {
         //load user by email

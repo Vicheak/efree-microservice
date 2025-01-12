@@ -7,6 +7,7 @@ import com.efree.category.api.external.fileservice.dto.FileDto;
 import com.efree.category.api.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,25 @@ public class CategoryController {
     }
 
     @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/paginate")
+    public BaseApi<?> getAllCategoriesByPagination(@RequestParam(defaultValue = "1") int page,
+                                                   @RequestParam(defaultValue = "10") int size,
+                                                   @RequestParam(defaultValue = "nameEn") String sortBy,
+                                                   @RequestParam(defaultValue = "asc") String direction) {
+
+        Page<CategoryResponseDto> categoryResponseDtoPage =
+                categoryService.getAllCategoriesByPagination(page, size, sortBy, direction);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.OK.value())
+                .message("Categories loaded successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(categoryResponseDtoPage)
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
     public BaseApi<?> loadCategoryById(@PathVariable String id) {
 
@@ -50,6 +70,25 @@ public class CategoryController {
                 .message("Category with id, %s loaded successfully!".formatted(id))
                 .timestamp(LocalDateTime.now())
                 .payload(categoryResponseDto)
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search")
+    public BaseApi<?> searchCategories(@RequestParam(required = false) String keyword,
+                                       @RequestParam(required = false) String field,
+                                       @RequestParam(defaultValue = "nameEn") String sortBy,
+                                       @RequestParam(defaultValue = "asc") String direction) {
+
+        List<CategoryResponseDto> categoryResponseDtoList =
+                categoryService.searchProducts(keyword, field, sortBy, direction);
+
+        return BaseApi.builder()
+                .isSuccess(true)
+                .code(HttpStatus.OK.value())
+                .message("Search result has been performed successfully!")
+                .timestamp(LocalDateTime.now())
+                .payload(categoryResponseDtoList)
                 .build();
     }
 

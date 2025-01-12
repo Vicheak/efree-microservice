@@ -6,6 +6,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.resolver.DefaultAddressResolverGroup;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -22,8 +23,16 @@ public class UserServiceWebClient {
 
     private final WebClient webClient;
 
-//    @Value("${rest.user-service.base-url}")
-//    private String restServiceUrl;
+    @Value("${rest.user-service.base-url}")
+    private String restServiceUrl;
+    @Value("${rest.user-service.connection-timeout}")
+    private String connectionTimeout;
+    @Value("${rest.user-service.response-timeout}")
+    private String responseTimeout;
+    @Value("${rest.user-service.read-timeout}")
+    private String readTimeout;
+    @Value("${rest.user-service.write-timeout}")
+    private String writeTimeout;
 
     public UserServiceWebClient(WebClient.Builder webClientBuilder) {
         // Configure Netty HttpClient with custom DNS resolver
@@ -39,8 +48,9 @@ public class UserServiceWebClient {
 
         // Create WebClient with the customized HttpClient
         this.webClient = webClientBuilder
-                .baseUrl("http://user-service-svc.microservice.svc.prod:8100/api/v1/users")
-//                .baseUrl("http://localhost:8100/api/v1/users")
+//                .baseUrl(restServiceUrl + "/api/v1/users")
+                .baseUrl("http://localhost:8100/api/v1/users")
+//                .baseUrl("http://user-service-svc.microservice.svc.prod:8100/api/v1/users")
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();

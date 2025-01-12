@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "category-service", url = "http://category-service-svc.microservice.svc.prod:8080")
+@FeignClient(name = "category-service"/*, url = "${rest.category-service.base-url}"*/)
 public interface CategoryServiceRestClient {
 
     @GetMapping("/api/v1/categories/{id}")

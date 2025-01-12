@@ -3,12 +3,16 @@ package com.efree.category.api.service.impl;
 import com.efree.category.api.dto.mapper.CategoryMapper;
 import com.efree.category.api.dto.request.CategoryRequestDto;
 import com.efree.category.api.dto.response.CategoryResponseDto;
+import com.efree.category.api.entity.Category;
 import com.efree.category.api.external.fileservice.FileServiceRestClientConsumer;
 import com.efree.category.api.external.fileservice.dto.FileDto;
-import com.efree.category.api.entity.Category;
 import com.efree.category.api.repository.CategoryRepository;
 import com.efree.category.api.service.CategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +37,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Page<CategoryResponseDto> getAllCategoriesByPagination(int page, int size, String sortBy, String direction) {
+        PageRequest pageRequest = buildPageRequest(page, size, sortBy, direction);
+        Page<Category> categoriesPage = categoryRepository.findAll(pageRequest);
+        return categoriesPage.map(categoryMapper::mapFromCategoryToCategoryResponseDto);
+    }
+
+    @Override
     public CategoryResponseDto loadCategoryById(String id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(
@@ -42,6 +53,20 @@ public class CategoryServiceImpl implements CategoryService {
                 );
 
         return categoryMapper.mapFromCategoryToCategoryResponseDto(category);
+    }
+
+    @Override
+    public List<CategoryResponseDto> searchProducts(String keyword, String field, String sortBy, String direction) {
+        Specification<Category> spec = (root, query, criteriaBuilder) -> {
+            if (field != null && keyword != null) {
+                return criteriaBuilder.like(criteriaBuilder.lower(root.get(field)),
+                        "%" + keyword.toLowerCase() + "%");
+            }
+            return null;
+        };
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        List<Category> categories = categoryRepository.findAll(spec, Sort.by(sortDirection, sortBy));
+        return categoryMapper.mapFromCategoryToCategoryResponseDto(categories);
     }
 
     @Transactional
@@ -106,7 +131,7 @@ public class CategoryServiceImpl implements CategoryService {
                 );
 
         //check category resource
-        if(!category.getProducts().isEmpty()){
+        if (!category.getProducts().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Category resource cannot be removed, it is used for another resource");
         }
@@ -114,6 +139,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.delete(category);
     }
 
+    @Transactional
     @Override
     public FileDto uploadCategoryImage(String uuid, MultipartFile fileRequest) {
         //check if the category does not exist
@@ -130,6 +156,15 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(category);
 
         return fileDto;
+    }
+
+    private PageRequest buildPageRequest(int page, int size, String sortBy, String direction) {
+        if (page <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Page number must be greater than 0");
+        }
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        return PageRequest.of(page - 1, size, Sort.by(sortDirection, sortBy));
     }
 
 }

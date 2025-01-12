@@ -80,7 +80,7 @@ management:
 rest:
   category-service:
     base-url: ${CATEGORY_SERVICE_BASE_URL}
-  file-service:
-    base-url: ${FILE_SERVICE_BASE_URL}
   user-service:
     base-url: ${USER_SERVICE_BASE_URL}
+  file-service:
+    base-url: ${FILE_SERVICE_BASE_URL}

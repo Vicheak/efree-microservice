@@ -8,7 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "payment-service"/*, url = "http://payment-service-svc.microservice.svc.prod:8120"*/)
+@FeignClient(name = "payment-service"/*, url = "${rest.payment-service.base-url}"*/)
 public interface PaymentServiceRestClient {
 
     @PostMapping("/api/v1/payments")

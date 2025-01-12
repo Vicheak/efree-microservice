@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-@FeignClient(name = "file-service", url = "http://file-service-svc.microservice.svc.prod:8130") // LB will route to service
+@FeignClient(name = "file-service"/*, url = "${rest.file-service.base-url}"*/) // LB will route to service
 public interface FileServiceRestClient {
 
     @PostMapping(value = "/api/v1/files/single", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

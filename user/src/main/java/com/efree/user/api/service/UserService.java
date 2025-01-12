@@ -75,7 +75,6 @@ public interface UserService {
      */
     AuthProfileUserDto loadUserProfile(String email);
 
-
     AuthUserDto loadAuthUserByEmail(String email);
 
 }

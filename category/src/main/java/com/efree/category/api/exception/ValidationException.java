@@ -2,6 +2,7 @@ package com.efree.category.api.exception;
 
 import com.efree.category.api.base.BaseError;
 import com.efree.category.api.base.FieldError;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,30 @@ public class ValidationException {
                 .code(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
                 .errors(errors)
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public BaseError<?> handleInvalidArgException(IllegalArgumentException ex) {
+        return BaseError.builder()
+                .isSuccess(false)
+                .message("Invalid request has been errored, please check...!")
+                .code(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .errors(ex.getMessage())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(PropertyReferenceException.class)
+    public BaseError<?> handlePropertyReferenceException(PropertyReferenceException ex) {
+        return BaseError.builder()
+                .isSuccess(false)
+                .message("Property request has been errored, please check...!")
+                .code(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .errors(ex.getMessage())
                 .build();
     }
 
