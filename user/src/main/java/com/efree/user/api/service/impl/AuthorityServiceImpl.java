@@ -1,6 +1,5 @@
 package com.efree.user.api.service.impl;
 
-import com.efree.user.api.dto.mapper.AuthMapper;
 import com.efree.user.api.dto.mapper.AuthorityMapper;
 import com.efree.user.api.dto.response.AuthorityResponseDto;
 import com.efree.user.api.entity.Authority;

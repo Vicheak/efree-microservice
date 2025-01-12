@@ -34,18 +34,13 @@ public class ProductRequest {
     Long stockQty;
     @NotNull
     Boolean status;
-//    @NotBlank
     @Length(max = 50)
     String weightType;
-//    @NotNull
     @Positive
     BigDecimal weight;
-//    @NotBlank
     String dimension;
-//    @NotBlank
     @Length(max = 100)
     String brand;
-//    @NotBlank
     @Length(max = 100)
     String warrantyPeriod;
     @NotNull
@@ -54,18 +49,12 @@ public class ProductRequest {
     Boolean isNewArrival;
     @NotNull
     Boolean isBestSeller;
-//    @NotBlank
     @Length(max = 100)
     String shippingClass;
-//    @NotBlank
     String returnPolicy;
-//    @NotBlank
     String metaTitle;
-//    @NotBlank
     String metaDescription;
-//    @NotNull
     Boolean isSecondHand;
-//    @NotNull
     String secondHandDescription;
 
     //for mapping

@@ -16,11 +16,11 @@ spring:
     name: api-gateway
 
   profiles:
-    active: prod
+    active: dev
 
   config:
-#    import: optional:configserver:http://localhost:8888/
-    import: optional:configserver:http://configuration-service-svc.microservice.svc.prod:8888/
+    import: optional:configserver:http://localhost:8888/
+#    import: optional:configserver:http://configuration-service-svc.microservice.svc.prod:8888/
 
 #  security:
 #    user:
@@ -36,7 +36,7 @@ spring:
 
     kubernetes:
       discovery:
-        enabled: false
+        enabled: false # disable spring cloud kubernetes
         all-namespaces: true  # Optional, set to true if you want to discover services across all namespaces
 #        discovery-server-url: https://kubernetes.default.svc.prod
 
@@ -69,13 +69,13 @@ management:
     env:
       enabled: true
 
-logging:
-  level:
-    org:
-      springframework:
-        http:
-          client: DEBUG
-        security: DEBUG
+#logging:
+#  level:
+#    org:
+#      springframework:
+#        http:
+#          client: DEBUG
+#        security: DEBUG
 #        web:
 #          reactive:
 #            function:
@@ -88,8 +88,42 @@ logging:
 #        ribbon: DEBUG
 
 rest:
+  category-service:
+    base-url: ${CATEGORY_SERVICE_BASE_URL}
+    connection-timeout: 5000 #ms
+    response-timeout: 5 #s
+    read-timeout: 10 #s
+    write-timeout: 10 #s
+  product-service:
+    base-url: ${PRODUCT_SERVICE_BASE_URL}
+    connection-timeout: 5000 #ms
+    response-timeout: 5 #s
+    read-timeout: 10 #s
+    write-timeout: 10 #s
   user-service:
     base-url: ${USER_SERVICE_BASE_URL}
+    connection-timeout: 5000 #ms
+    response-timeout: 5 #s
+    read-timeout: 10 #s
+    write-timeout: 10 #s
+  order-service:
+    base-url: ${ORDER_SERVICE_BASE_URL}
+    connection-timeout: 5000 #ms
+    response-timeout: 5 #s
+    read-timeout: 10 #s
+    write-timeout: 10 #s
+  payment-service:
+    base-url: ${PAYMENT_SERVICE_BASE_URL}
+    connection-timeout: 5000 #ms
+    response-timeout: 5 #s
+    read-timeout: 10 #s
+    write-timeout: 10 #s
+  file-service:
+    base-url: ${FILE_SERVICE_BASE_URL}
+    connection-timeout: 5000 #ms
+    response-timeout: 5 #s
+    read-timeout: 10 #s
+    write-timeout: 10 #s
 
 access-token:
   private: ${ACCESS_TOKEN_PRIVATE}

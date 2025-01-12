@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.efree.user</groupId>
 	<artifactId>user-service</artifactId>
-	<version>1.0.0</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>user-service</name>
 	<description>user service</description>
 	<url/>

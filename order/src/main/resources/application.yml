@@ -32,7 +32,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
@@ -66,3 +66,11 @@ management:
   info:
     env:
       enabled: true
+
+rest:
+  product-service:
+    base-url: ${PRODUCT_SERVICE_BASE_URL}
+  user-service:
+    base-url: ${USER_SERVICE_BASE_URL}
+  payment-service:
+    base-url: ${PAYMENT_SERVICE_BASE_URL}

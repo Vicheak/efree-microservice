@@ -8,4 +8,6 @@ public interface RateService {
 
     Long countRateByProductId(String productId);
 
+//    RateResponse countRateByUser(String productId, String userId);
+
 }

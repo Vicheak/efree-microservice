@@ -96,3 +96,7 @@ management:
 rest:
   file-service:
     base-url: ${FILE_SERVICE_BASE_URL}
+  product-service:
+    base-url: ${PRODUCT_SERVICE_BASE_URL}
+  payment-service:
+    base-url: ${PAYMENT_SERVICE_BASE_URL}

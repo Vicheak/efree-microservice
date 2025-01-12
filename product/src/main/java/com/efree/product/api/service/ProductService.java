@@ -31,4 +31,8 @@ public interface ProductService {
 
     void postStock(PostStockRequest request);
 
+//    void updateStock(PostStockRequest request);
+
+//    ImportProductResponse importProduct(MultipartFile requestedFile);
+
 }

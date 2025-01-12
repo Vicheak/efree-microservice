@@ -16,7 +16,7 @@ spring:
     name: file-service
 
   profiles:
-    active: prod
+    active: dev
 
   datasource:
     username: ${DB_USERNAME}
@@ -47,8 +47,8 @@ spring:
       max-file-size: 15MB
 
   config:
-#    import: optional:configserver:http://localhost:8888/
-    import: optional:configserver:http://configuration-service-svc.microservice.svc.prod:8888/
+    import: optional:configserver:http://localhost:8888/
+#    import: optional:configserver:http://configuration-service-svc.microservice.svc.prod:8888/
 
 file:
   supported-extension: jpg,png,jpeg,webp,gif
