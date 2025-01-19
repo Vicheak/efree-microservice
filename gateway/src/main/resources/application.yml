@@ -16,11 +16,11 @@ spring:
     name: api-gateway
 
   profiles:
-    active: dev
+    active: prod
 
   config:
-    import: optional:configserver:http://localhost:8888/
-#    import: optional:configserver:http://configuration-service-svc.microservice.svc.prod:8888/
+#    import: optional:configserver:http://localhost:8888/
+    import: optional:configserver:http://configuration-service-svc.microservice.svc.prod:8888/
 
 #  security:
 #    user:

@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@FeignClient(name = "file-service"/*, url = "${rest.file-service.base-url}"*/) // LB will route to service
+@FeignClient(name = "file-service", url = "${rest.file-service.base-url}") // LB will route to service
 public interface FileServiceRestClient {
 
     @PostMapping(value = "/api/v1/files/single", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

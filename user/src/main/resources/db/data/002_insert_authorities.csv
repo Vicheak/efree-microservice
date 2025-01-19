@@ -12,7 +12,7 @@ authority_id,authority_name
 11,product:write
 12,product:update
 13,product:delete
-14,order:toaddtocard
+14,order:toaddtocart
 15,order:tosave
 16,order:tomake
 17,order:topayment

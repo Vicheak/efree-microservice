@@ -1,5 +1,7 @@
 package com.efree.order.api.service.impl;
 
+import com.efree.order.api.dto.mapper.OrderMapper;
+import com.efree.order.api.dto.mapper.OrderUnauthMapper;
 import com.efree.order.api.dto.request.*;
 import com.efree.order.api.dto.response.*;
 import com.efree.order.api.entity.*;
@@ -14,7 +16,12 @@ import com.efree.order.api.service.OrderService;
 import com.efree.order.api.util.EOrderStatus;
 import com.efree.order.api.util.EPaymentStatus;
 import com.efree.order.api.util.OrderUtil;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,9 +42,11 @@ public class OrderServiceImpl implements OrderService {
     private final OrderUnauthDetailRepository orderUnauthDetailRepository;
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
+    private final OrderMapper orderMapper;
     private final UserServiceRestClientConsumer userServiceRestClientConsumer;
     private final ProductServiceRestClientConsumer productServiceRestClientConsumer;
     private final PaymentServiceRestClientConsumer paymentServiceRestClientConsumer;
+    private final OrderUnauthMapper orderUnauthMapper;
 
     @Override
     public ProceedAddToCartResponse proceedAddToCart(ProceedAddToCartRequest proceedAddToCartRequest) {
@@ -142,7 +151,7 @@ public class OrderServiceImpl implements OrderService {
         UserDto userDto = validateUserRequest(authUserUuid);
 
         authorizeOrderRequest.cartList().forEach(authorizeCartRequest ->
-                        validateProductResource(authorizeCartRequest.productId(), authorizeCartRequest.quantity()));
+                validateProductResource(authorizeCartRequest.productId(), authorizeCartRequest.quantity()));
 
         //post stock of product
         authorizeOrderRequest.cartList().forEach(authorizeCartRequest ->
@@ -158,7 +167,7 @@ public class OrderServiceImpl implements OrderService {
         //build order
         Order newOrder = new Order();
         newOrder.setOrderId(UUID.randomUUID().toString());
-        newOrder.setUserId(authUserUuid);
+        newOrder.setUserId(userDto.uuid());
         newOrder.setOrderDate(LocalDateTime.now());
         newOrder.setTotalAmount(authorizeOrderRequest.totalAmount());
         newOrder.setPaymentStatus(EPaymentStatus.UNPAID.name());
@@ -240,12 +249,12 @@ public class OrderServiceImpl implements OrderService {
 
         //check product list exists or not
         saveOrderUnauthRequest.cartList().forEach(saveOrderUnauthCartRequest ->
-                        validateProductResource(saveOrderUnauthCartRequest.productId(), saveOrderUnauthCartRequest.quantity()));
+                validateProductResource(saveOrderUnauthCartRequest.productId(), saveOrderUnauthCartRequest.quantity()));
 
         //build order unauth
         OrderUnauth orderUnauth = new OrderUnauth();
         orderUnauth.setOrderUnauthId(UUID.randomUUID().toString());
-        orderUnauth.setUserId(authUserUuid);
+        orderUnauth.setUserId(userDto.uuid());
         orderUnauth.setOrderDate(LocalDateTime.now());
         orderUnauth.setTotalAmount(saveOrderUnauthRequest.totalAmount());
         orderUnauth.setOrderContact(userDto.phoneNumber());
@@ -284,6 +293,156 @@ public class OrderServiceImpl implements OrderService {
         saveOrderUnauthResponse.setOrderUnauthDetails(saveOrderUnauthCartResponseList);
 
         return saveOrderUnauthResponse;
+    }
+
+    @Override
+    public OrderResponse loadOrderByOrderId(String authUserUuid, String orderId) {
+        UserDto userDto = validateUserRequest(authUserUuid);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Order with id, %s has not been found in the system!"
+                                        .formatted(orderId))
+                );
+
+        //validate request user for order resource
+        if (!userDto.authorities().contains("ROLE_ADMIN") && !userDto.uuid().equals(order.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Permission denied to view order resource");
+        }
+
+        return orderMapper.mapFromOrderToOrderResponse(order);
+    }
+
+    @Override
+    public Page<OrderResponse> loadAuthOrderHistory(String authUserUuid, int byLastDay, int page, int size, String sortBy, String direction) {
+        //validate by last day param
+        if (byLastDay < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "By last day cannot be less than ZERO, must start with today or the previous day!");
+        }
+
+        UserDto userDto = validateUserRequest(authUserUuid);
+
+        PageRequest pageRequest = buildPageRequest(page, size, sortBy, direction);
+
+        Specification<Order> spec = (root, query, criteriaBuilder) -> {
+            //Calculate start of the target day
+            LocalDateTime startFromDay = LocalDateTime.now().minusDays(byLastDay).toLocalDate().atStartOfDay();
+            //Filter by the order date starting from the target day
+            Predicate datePredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("orderDate"), startFromDay);
+            //Filter by user ID if provided and not an ADMIN
+            if(!userDto.authorities().contains("ROLE_ADMIN")){
+                Predicate userPredicate = criteriaBuilder.equal(root.get("userId"), userDto.uuid());
+                return criteriaBuilder.and(datePredicate, userPredicate);
+            }
+            return criteriaBuilder.and(datePredicate);
+        };
+
+        Page<Order> ordersPage = orderRepository.findAll(spec, pageRequest);
+
+        return ordersPage.map(orderMapper::mapFromOrderToOrderResponse);
+    }
+
+    @Transactional
+    @Override
+    public OrderStatusResponse setPrepareOrder(String orderId, OrderStatusRequest orderStatusRequest) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Order with id, %s has not been found in the system!"
+                                        .formatted(orderId))
+                );
+
+        //validate order status
+        if (!EOrderStatus.isValidOrderStatus(orderStatusRequest.orderStatus())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Order status is invalid! possible status, " + Arrays.stream(EOrderStatus.values()).toList());
+        }
+
+        order.setIsPrepared(orderStatusRequest.isPrepared());
+        order.setOrderStatus(orderStatusRequest.orderStatus().toUpperCase());
+        orderRepository.save(order);
+
+        OrderStatusResponse orderStatusResponse = new OrderStatusResponse();
+        orderStatusResponse.setOrderId(order.getOrderId());
+        orderStatusResponse.setIsPrepared(order.getIsPrepared());
+        orderStatusResponse.setOrderStatus(order.getOrderStatus());
+
+        return orderStatusResponse;
+    }
+
+    @Override
+    public OrderUnauthResponse loadOrderUnauthByOrderId(String authUserUuid, String orderId) {
+        UserDto userDto = validateUserRequest(authUserUuid);
+
+        OrderUnauth orderUnauth = orderUnauthRepository.findById(orderId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Order unauth with id, %s has not been found in the system!"
+                                        .formatted(orderId))
+                );
+
+        //validate request user for order resource
+        if (!userDto.authorities().contains("ROLE_ADMIN") && !userDto.uuid().equals(orderUnauth.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Permission denied to view order resource");
+        }
+
+        return orderUnauthMapper.mapFromOrderUnauthToOrderUnauthResponse(orderUnauth);
+    }
+
+    @Override
+    public Page<OrderUnauthResponse> loadAuthOrderUnauthHistory(String authUserUuid, int byLastDay, int page, int size, String sortBy, String direction) {
+        //validate by last day param
+        if (byLastDay < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "By last day cannot be less than ZERO, must start with today or the previous day!");
+        }
+
+        UserDto userDto = validateUserRequest(authUserUuid);
+
+        PageRequest pageRequest = buildPageRequest(page, size, sortBy, direction);
+
+        Specification<OrderUnauth> spec = (root, query, criteriaBuilder) -> {
+            //Calculate start of the target day
+            LocalDateTime startFromDay = LocalDateTime.now().minusDays(byLastDay).toLocalDate().atStartOfDay();
+            //Filter by the order date starting from the target day
+            Predicate datePredicate = criteriaBuilder.greaterThanOrEqualTo(root.get("orderDate"), startFromDay);
+            //Filter by user ID if provided and not an ADMIN
+            if(!userDto.authorities().contains("ROLE_ADMIN")){
+                Predicate userPredicate = criteriaBuilder.equal(root.get("userId"), userDto.uuid());
+                return criteriaBuilder.and(datePredicate, userPredicate);
+            }
+            return criteriaBuilder.and(datePredicate);
+        };
+
+        Page<OrderUnauth> ordersPage = orderUnauthRepository.findAll(spec, pageRequest);
+
+        return ordersPage.map(orderUnauthMapper::mapFromOrderUnauthToOrderUnauthResponse);
+    }
+
+    @Transactional
+    @Override
+    public void deleteOrderUnauthByOrderId(String authUserUuid, String orderId) {
+        UserDto userDto = validateUserRequest(authUserUuid);
+
+        OrderUnauth orderUnauth = orderUnauthRepository.findById(orderId)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Order unauth with id, %s has not been found in the system!"
+                                        .formatted(orderId))
+                );
+
+        //validate request user for order resource
+        if (!userDto.authorities().contains("ROLE_ADMIN") && !userDto.uuid().equals(orderUnauth.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Permission denied to remove order unauth resource");
+        }
+
+        orderUnauthDetailRepository.deleteAll(orderUnauth.getOrderUnauthDetails());
+        orderUnauthRepository.delete(orderUnauth);
     }
 
     private void processCartList(List<AddToCartResponse> cartList, ProceedAddToCartResponse proceedAddToCartResponse) {
@@ -377,6 +536,15 @@ public class OrderServiceImpl implements OrderService {
                     "Error decoding request auth!");
         }
         return authUserUuid;
+    }
+
+    private PageRequest buildPageRequest(int page, int size, String sortBy, String direction) {
+        if (page <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Page number must be greater than 0");
+        }
+        Sort.Direction sortDirection = "asc".equalsIgnoreCase(direction) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        return PageRequest.of(page - 1, size, Sort.by(sortDirection, sortBy));
     }
 
 }

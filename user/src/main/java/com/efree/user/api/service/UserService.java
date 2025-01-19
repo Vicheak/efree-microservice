@@ -62,10 +62,27 @@ public interface UserService {
      */
     FileDto uploadUserProfile(String authUserUuid, String uuid, MultipartFile fileRequest);
 
+    /**
+     * This method is used to load requested user permission
+     * @param uuid is the path parameter from client
+     * @return List<AuthorityResponseDto>
+     */
     List<AuthorityResponseDto> loadUserPermission(String uuid);
 
+    /**
+     * This method is used to set user permission
+     * @param uuid is the path parameter from client
+     * @param permissionRequestDto is the request from client
+     * @return List<AuthorityResponseDto>
+     */
     List<AuthorityResponseDto> setUserPermission(String uuid, PermissionRequestDto permissionRequestDto);
 
+    /**
+     * This method is used to remove user permission
+     * @param uuid is the path parameter from client
+     * @param permissionRequestDto is the request from client
+     * @return List<AuthorityResponseDto>
+     */
     List<AuthorityResponseDto> removeUserPermission(String uuid, PermissionRequestDto permissionRequestDto);
 
     /**
@@ -75,6 +92,11 @@ public interface UserService {
      */
     AuthProfileUserDto loadUserProfile(String email);
 
+    /**
+     * This method is used to load authenticated user by email
+     * @param email is the path parameter from client
+     * @return AuthUserDto
+     */
     AuthUserDto loadAuthUserByEmail(String email);
 
 }

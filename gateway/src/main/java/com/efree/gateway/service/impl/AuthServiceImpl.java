@@ -81,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
                             .accessToken(generateAccessToken(GenerateTokenDto.builder()
                                     .auth(authenticatedAuth.getName())
                                     .scope(scope)
-                                    .expiration(Instant.now().plus(1, ChronoUnit.HOURS))
+                                    .expiration(Instant.now().plus(24, ChronoUnit.HOURS))
                                     .build()))
                             .refreshToken(generateRefreshToken(GenerateTokenDto.builder()
                                     .auth(authenticatedAuth.getName())
@@ -105,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
                     String accessToken = generateAccessToken(GenerateTokenDto.builder()
                             .auth(jwt.getId())
                             .scope(jwt.getClaimAsString(AppGlobalConstant.JWT_CLAIM_AUTH))
-                            .expiration(Instant.now().plus(1, ChronoUnit.HOURS))
+                            .expiration(Instant.now().plus(24, ChronoUnit.HOURS))
                             .build());
 
                     String refreshToken = generateRefreshTokenCheckDuration(GenerateTokenDto.builder()

@@ -2,6 +2,7 @@ package com.efree.product.api.controller;
 
 import com.efree.product.api.base.BaseApi;
 import com.efree.product.api.dto.request.RateRequest;
+import com.efree.product.api.dto.response.RateResponse;
 import com.efree.product.api.service.RateService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -43,6 +44,21 @@ public class RateController {
                 .isSuccess(true)
                 .timestamp(LocalDateTime.now())
                 .payload(rate)
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.OK);
+    }
+
+    @GetMapping("/count-by-product-user")
+    @Operation(summary = "count rate of a product of a specific user")
+    public ResponseEntity<BaseApi<Object>> countRateByUser(@RequestParam String productId,
+                                                           @RequestParam String userId) {
+        RateResponse rateResponse = rateService.countRateByUser(productId, userId);
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Count review of a product successfully")
+                .code(HttpStatus.OK.value())
+                .isSuccess(true)
+                .timestamp(LocalDateTime.now())
+                .payload(rateResponse)
                 .build();
         return new ResponseEntity<>(api, HttpStatus.OK);
     }

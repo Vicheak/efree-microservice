@@ -7,7 +7,9 @@ import lombok.Builder;
 public record CategoryResponseDto(String id,
                                   String nameEn,
                                   String nameKh,
+                                  @JsonInclude(JsonInclude.Include.NON_NULL)
                                   String descriptionEn,
+                                  @JsonInclude(JsonInclude.Include.NON_NULL)
                                   String descriptionKh,
                                   @JsonInclude(JsonInclude.Include.NON_NULL)
                                   String imageUrl,

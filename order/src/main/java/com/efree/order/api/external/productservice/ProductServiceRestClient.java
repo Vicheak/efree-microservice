@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "product-service"/*, url = "${rest.product-service.base-url}"*/)
+@FeignClient(name = "product-service", url = "${rest.product-service.base-url}")
 public interface ProductServiceRestClient {
 
     @PostMapping("/api/v1/products/post-stock")

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,18 @@ public class ValidationException {
         return BaseError.builder()
                 .isSuccess(false)
                 .message("Property request has been errored, please check...!")
+                .code(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
+                .errors(ex.getMessage())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IOException.class)
+    public BaseError<?> handleIOException(IOException ex) {
+        return BaseError.builder()
+                .isSuccess(false)
+                .message("Something went wrong, please check...!")
                 .code(HttpStatus.BAD_REQUEST.value())
                 .timestamp(LocalDateTime.now())
                 .errors(ex.getMessage())

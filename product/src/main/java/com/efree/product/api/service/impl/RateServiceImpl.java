@@ -1,6 +1,7 @@
 package com.efree.product.api.service.impl;
 
 import com.efree.product.api.dto.request.RateRequest;
+import com.efree.product.api.dto.response.RateResponse;
 import com.efree.product.api.entity.Product;
 import com.efree.product.api.entity.Rate;
 import com.efree.product.api.external.userservice.UserServiceRestClientConsumer;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -71,6 +73,22 @@ public class RateServiceImpl implements RateService {
                                         .formatted(productId))
                 );
         return rateRepository.findTotalRatingByProductId(UUID.fromString(productId));
+    }
+
+    @Override
+    public RateResponse countRateByUser(String productId, String userId) {
+        productRepository.findById(UUID.fromString(productId))
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Product with id, %s has not been found in the system!"
+                                        .formatted(productId))
+                );
+        Rate rate = rateRepository.findByProductIdAndUserId(UUID.fromString(productId), userId);
+        if (Objects.isNull(rate)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Your requested product rate has not been found in the system!");
+        }
+        return rate.toResponse();
     }
 
 }

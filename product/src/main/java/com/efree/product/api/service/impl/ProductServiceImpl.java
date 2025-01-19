@@ -1,7 +1,9 @@
 package com.efree.product.api.service.impl;
 
+import com.efree.product.api.dto.request.ImportProductRequest;
 import com.efree.product.api.dto.request.PostStockRequest;
 import com.efree.product.api.dto.request.ProductRequest;
+import com.efree.product.api.dto.response.ImportProductResponse;
 import com.efree.product.api.dto.response.ProductResponse;
 import com.efree.product.api.entity.Product;
 import com.efree.product.api.external.categoryservice.CategoryServiceRestClientConsumer;
@@ -9,6 +11,11 @@ import com.efree.product.api.external.categoryservice.dto.CategoryResponseDto;
 import com.efree.product.api.repository.ProductRepository;
 import com.efree.product.api.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -16,12 +23,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +52,13 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponse> getAllProductsByPagination(int page, int size, String sortBy, String direction) {
         PageRequest pageRequest = buildPageRequest(page, size, sortBy, direction);
         Page<Product> productsPage = productRepository.findAll(pageRequest);
-        return productsPage.map(Product::toResponse);
+        return productsPage.map(product -> {
+            CategoryResponseDto categoryResponseDto =
+                    categoryServiceRestClientConsumer.loadCategoryById(product.getCategoryId());
+            ProductResponse productResponse = product.toResponse();
+            productResponse.setCategoryResponseDto(categoryResponseDto);
+            return productResponse;
+        });
     }
 
     @Override
@@ -165,6 +178,105 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
+    public List<ImportProductResponse> importProduct(MultipartFile requestedFile) {
+        //define map for unexpected error
+        Map<Integer, String> map = new HashMap<>();
+        List<ImportProductRequest> importProductRequests = new ArrayList<>();
+
+        try {
+            Workbook workbook = new XSSFWorkbook(requestedFile.getInputStream());
+            Sheet sheet = workbook.getSheet("import");
+            Iterator<Row> rowIterator = sheet.iterator();
+            rowIterator.next();
+            int rowNumber = 1;
+            while (rowIterator.hasNext()) {
+                try {
+                    Row row = rowIterator.next();
+                    int cellIndex = 0;
+
+                    Cell cellNo = row.getCell(cellIndex);
+                    String productUuid = cellNo.getStringCellValue();
+
+                    //skip product note or description
+                    cellIndex += 2;
+
+                    cellNo = row.getCell(cellIndex++);
+                    double productPrice = cellNo.getNumericCellValue();
+
+                    cellNo = row.getCell(cellIndex++);
+                    long productStockAmt = (long) cellNo.getNumericCellValue();
+
+                    //build import product request
+                    ImportProductRequest importProductRequest = new ImportProductRequest();
+                    importProductRequest.setProductUuid(productUuid);
+                    importProductRequest.setPrice(BigDecimal.valueOf(productPrice));
+                    importProductRequest.setStockAmt(productStockAmt);
+                    importProductRequests.add(importProductRequest);
+
+                    rowNumber++;
+                } catch (Exception ex) {
+                    map.put(rowNumber, ex.getMessage());
+                    rowNumber++;
+                }
+            }
+        } catch (IOException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }
+
+        if (!map.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, map.toString());
+        }
+
+        //validate imported product
+        Map<String, Product> requestImportProduct = new HashMap<>();
+        importProductRequests.forEach(importProductRequest -> {
+            Product product = productRepository.findById(UUID.fromString(importProductRequest.getProductUuid()))
+                    .orElseThrow(
+                            () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                    "Product with id, %s has not been found in the system!"
+                                            .formatted(importProductRequest.getProductUuid()))
+                    );
+
+            if (importProductRequest.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Product price must not be less than ZERO or exact ZERO!, " + importProductRequest.getProductUuid());
+            }
+
+            if (importProductRequest.getStockAmt() < 0) {
+                if (product.getStockQty() - (Math.abs(importProductRequest.getStockAmt())) < 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Product stock is insufficient for deduction of stock amount!, " + importProductRequest.getProductUuid());
+                }
+            }
+
+            requestImportProduct.put(importProductRequest.getProductUuid(), product);
+        });
+
+        List<ImportProductResponse> importProductResponses = new ArrayList<>();
+        importProductRequests.forEach(importProductRequest -> {
+            Product product = requestImportProduct.get(importProductRequest.getProductUuid());
+            product.setPrice(importProductRequest.getPrice());
+            product.setStockQty(product.getStockQty() + importProductRequest.getStockAmt());
+            productRepository.save(product);
+
+            //build response
+            ImportProductResponse importProductResponse = new ImportProductResponse();
+            importProductResponse.setProductId(product.getId().toString());
+            importProductResponse.setNameEn(product.getNameEn());
+            importProductResponse.setNameKh(product.getNameKh());
+            importProductResponse.setPrice(product.getPrice());
+            importProductResponse.setStockQty(product.getStockQty());
+            importProductResponse.setStatus(product.getStatus());
+            importProductResponse.setCreatedAt(product.getCreatedAt());
+            importProductResponse.setUpdatedAt(product.getUpdatedAt());
+            importProductResponses.add(importProductResponse);
+        });
+
+        return importProductResponses;
+    }
+
+    @Transactional
+    @Override
     public void postStock(PostStockRequest request) {
         if (request.getQuantity() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -198,7 +310,7 @@ public class ProductServiceImpl implements ProductService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Page number must be greater than 0");
         }
-        Sort.Direction sortDirection = "asc" .equalsIgnoreCase(direction) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort.Direction sortDirection = "asc".equalsIgnoreCase(direction) ? Sort.Direction.ASC : Sort.Direction.DESC;
         return PageRequest.of(page - 1, size, Sort.by(sortDirection, sortBy));
     }
 
