@@ -3,5 +3,5 @@
 |  | |  ||  .--' .-. | .-. :|  .--' `.  `-.| .-. :|  .--' \  `'  / ,--.| .--'| .-. :
 '  '-'  '|  |  \ `-' \   --.|  |    .-'    \   --.|  |     \    /  |  |\ `--.\   --.
  `-----' `--'   `---' `----'`--'    `-----' `----'`--'      `--'   `--' `---' `----'
- Service ${application.title}
- Service Version ${application.version}
+Service ${application.title}
+Service Version ${application.version}

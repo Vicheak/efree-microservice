@@ -16,4 +16,6 @@ public interface RateRepository extends JpaRepository<Rate, UUID> {
             nativeQuery = true)
     Long findTotalRatingByProductId(@Param("productId") UUID productId);
 
+    Rate findByProductIdAndUserId(UUID productId, String userId);
+
 }

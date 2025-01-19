@@ -3,6 +3,7 @@ package com.efree.product.api.controller;
 import com.efree.product.api.base.BaseApi;
 import com.efree.product.api.dto.request.PostStockRequest;
 import com.efree.product.api.dto.request.ProductRequest;
+import com.efree.product.api.dto.response.ImportProductResponse;
 import com.efree.product.api.dto.response.ProductResponse;
 import com.efree.product.api.service.ProductService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -155,6 +157,19 @@ public class ProductController {
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(api, HttpStatus.OK);
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<BaseApi<Object>> importProduct(@RequestPart(name = "importFile") MultipartFile requestedFile) {
+        List<ImportProductResponse> importProductResponse = productService.importProduct(requestedFile);
+        BaseApi<Object> api = BaseApi.builder()
+                .message("Import process has been done successfully")
+                .code(HttpStatus.CREATED.value())
+                .isSuccess(true)
+                .payload(importProductResponse)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(api, HttpStatus.CREATED);
     }
 
     //FOR CALL INTERNAL SERVICE

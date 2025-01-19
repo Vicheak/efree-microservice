@@ -80,7 +80,7 @@ public class AppGlobalSecurityConfig {
                     ROLE_ADMIN.getAuthority(), ACTUATOR_READ.getAuthority(), ACTUATOR_POST.getAuthority());
 
             //USER SERVICE
-            exchange.pathMatchers("/gateway/api/v1/auth/profile/me").hasAuthority(USER_PROFILE.getAuthority());
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/api/v1/auth/profile/me").hasAuthority(USER_PROFILE.getAuthority());
             exchange.pathMatchers(HttpMethod.POST, "/gateway/USER/api/v1/users/upload/profile/**", "/gateway/user/api/v1/users/upload/profile/**", "/user-service/api/v1/users/upload/profile/**").hasAuthority(USER_PROFILE.getAuthority());
             exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/api/v1/authorities/**", "/gateway/user/api/v1/authorities/**", "/user-service/api/v1/authorities/**").hasAuthority(ROLE_ADMIN.getAuthority());
             exchange.pathMatchers(HttpMethod.GET, "/gateway/USER/**", "/gateway/user/**", "/user-service/**").hasAuthority(USER_READ.getAuthority());
@@ -96,7 +96,8 @@ public class AppGlobalSecurityConfig {
             exchange.pathMatchers(HttpMethod.DELETE, "/gateway/CATEGORY/**", "/gateway/category/**", "/category-service/**").hasAuthority(CATEGORY_DELETE.getAuthority());
 
             //PRODUCT SERVICE
-            exchange.pathMatchers("/gateway/PRODUCT/api/v1/rates/count-by-product", "/gateway/product/api/v1/rates/count-by-product", "/product-service/api/v1/rates/count-by-product").permitAll();
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/PRODUCT/api/v1/rates/count-by-product-user", "/gateway/product/api/v1/rates/count-by-product-user", "/product-service/api/v1/rates/count-by-product-user").authenticated();
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/PRODUCT/api/v1/rates/count-by-product", "/gateway/product/api/v1/rates/count-by-product", "/product-service/api/v1/rates/count-by-product").permitAll();
             exchange.pathMatchers("/gateway/PRODUCT/api/v1/favorites/**", "/gateway/product/api/v1/favorites/**", "/product-service/api/v1/favorites/**").authenticated();
             exchange.pathMatchers(HttpMethod.POST, "/gateway/PRODUCT/api/v1/rates", "/gateway/product/api/v1/rates", "/product-service/api/v1/rates").authenticated();
             exchange.pathMatchers(HttpMethod.GET, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").permitAll();
@@ -106,9 +107,20 @@ public class AppGlobalSecurityConfig {
             exchange.pathMatchers(HttpMethod.DELETE, "/gateway/PRODUCT/**", "/gateway/product/**", "/product-service/**").hasAuthority(PRODUCT_DELETE.getAuthority());
 
             //ORDER SERVICE
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/ORDER/api/v1/orders/proceed-add-to-cart", "/gateway/order/api/v1/orders/proceed-add-to-cart", "/order-service/api/v1/orders/proceed-add-to-cart").hasAuthority(ORDER_ADDTOCART.getAuthority());
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/ORDER/api/v1/orders/authorize", "/gateway/order/api/v1/orders/authorize", "/order-service/api/v1/orders/authorize").hasAnyAuthority(ORDER_MAKE.getAuthority(), ORDER_PAYMENT.getAuthority());
+            exchange.pathMatchers(HttpMethod.POST, "/gateway/ORDER/api/v1/orders/save-order-unauth", "/gateway/order/api/v1/orders/save-order-unauth", "/order-service/api/v1/orders/save-order-unauth").hasAuthority(ORDER_SAVE.getAuthority());
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/ORDER/api/v1/orders/detail/**", "/gateway/order/api/v1/orders/detail/**", "/order-service/api/v1/orders/detail/**").hasAuthority(ORDER_DETAIL.getAuthority());
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/ORDER/api/v1/orders/history", "/gateway/order/api/v1/orders/history", "/order-service/api/v1/orders/history").hasAuthority(ORDER_GETFROMHISTORY.getAuthority());
+            exchange.pathMatchers(HttpMethod.PUT, "/gateway/ORDER/api/v1/orders/status/**", "/gateway/order/api/v1/orders/status/**", "/order-service/api/v1/orders/status/**").hasAuthority(ORDER_STATUS.getAuthority());
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/ORDER/api/v1/orders/detail-unauth/**", "/gateway/order/api/v1/orders/detail-unauth/**", "/order-service/api/v1/orders/detail-unauth/**").hasAuthority(ORDER_DETAIL.getAuthority());
+            exchange.pathMatchers(HttpMethod.GET, "/gateway/ORDER/api/v1/orders/history-unauth", "/gateway/order/api/v1/orders/history-unauth", "/order-service/api/v1/orders/history-unauth").hasAuthority(ORDER_GETFROMHISTORY.getAuthority());
             exchange.pathMatchers("/gateway/ORDER/**", "/gateway/order/**", "/order-service/**").authenticated();
 
             //PAYMENT SERVICE
+            exchange.pathMatchers("/gateway/PAYMENT/api/payments/success", "/gateway/payment/api/payments/success", "/payment-service/api/payments/success").permitAll();
+            exchange.pathMatchers("/gateway/PAYMENT/api/payments/cancel", "/gateway/payment/api/payments/cancel", "/payment-service/api/payments/cancel").permitAll();
+            exchange.pathMatchers("/gateway/PAYMENT/api/v1/payments", "/gateway/payment/api/v1/payments", "/payment-service/api/v1/payments").hasAuthority(PAYMENT_PAY.getAuthority());
             exchange.pathMatchers("/gateway/PAYMENT/**", "/gateway/payment/**", "/payment-service/**").authenticated();
 
             //FILE SERVICE
