@@ -57,6 +57,10 @@ public class ProductResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     String secondHandDescription;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    String basedImageUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    String basedImageDownloadUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     LocalDateTime createdAt;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     LocalDateTime updatedAt;

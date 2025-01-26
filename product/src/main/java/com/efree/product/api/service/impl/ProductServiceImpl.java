@@ -6,10 +6,12 @@ import com.efree.product.api.dto.request.ProductRequest;
 import com.efree.product.api.dto.response.ImportProductResponse;
 import com.efree.product.api.dto.response.ProductResponse;
 import com.efree.product.api.entity.Product;
+import com.efree.product.api.entity.ProductImage;
 import com.efree.product.api.external.categoryservice.CategoryServiceRestClientConsumer;
 import com.efree.product.api.external.categoryservice.dto.CategoryResponseDto;
 import com.efree.product.api.repository.ProductRepository;
 import com.efree.product.api.service.ProductService;
+import com.efree.product.api.util.ValueInjectUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -36,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryServiceRestClientConsumer categoryServiceRestClientConsumer;
+    private final ValueInjectUtil valueInjectUtil;
 
     @Transactional
     @Override
@@ -53,10 +56,22 @@ public class ProductServiceImpl implements ProductService {
         PageRequest pageRequest = buildPageRequest(page, size, sortBy, direction);
         Page<Product> productsPage = productRepository.findAll(pageRequest);
         return productsPage.map(product -> {
+            //set up category resource
             CategoryResponseDto categoryResponseDto =
                     categoryServiceRestClientConsumer.loadCategoryById(product.getCategoryId());
             ProductResponse productResponse = product.toResponse();
             productResponse.setCategoryResponseDto(categoryResponseDto);
+            //set up product image
+            List<ProductImage> productImages = product.getProductImages();
+            //check based product image
+            Optional<ProductImage> optionalProductImage = productImages.stream()
+                    .filter(ProductImage::getIsBased)
+                    .findFirst();
+            if(optionalProductImage.isPresent()){
+                ProductImage basedProductImage = optionalProductImage.get();
+                productResponse.setBasedImageUrl(valueInjectUtil.getImageUri(basedProductImage.getImageUrl()));
+                productResponse.setBasedImageDownloadUrl(valueInjectUtil.getDownloadUri(basedProductImage.getImageUrl()));
+            }
             return productResponse;
         });
     }
